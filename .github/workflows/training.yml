@@ -1,0 +1,40 @@
+name: Train Model
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, 3.10]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run training script
+        run: |
+          python scripts/train.py --config config/train_config.yaml
+
+      - name: Upload model checkpoint
+        uses: actions/upload-artifact@v2
+        with:
+          name: model-checkpoint
+          path: models/checkpoints/
