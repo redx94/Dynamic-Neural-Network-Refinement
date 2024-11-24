@@ -15,7 +15,7 @@ Dynamic Neural Network Refinement is a cutting-edge framework designed to adapti
 - **Scalability Optimizations:** Implements structured pruning and post-training quantization to reduce model size and inference latency.
 
 ## Repository Structure
-```
+
 Dynamic-Neural-Network-Refinement/
 ├── .github/
 │   └── workflows/
@@ -57,7 +57,7 @@ Dynamic-Neural-Network-Refinement/
 ├── environment.yml
 ├── setup.py
 └── LICENSE
-```
+
 ## Installation
 
 1. **Clone the Repository:**
@@ -129,7 +129,7 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 ## License
 
-This project license - see the [LICENSE](LICENSE) file for details.
+
 
 ## Acknowledgements
 
