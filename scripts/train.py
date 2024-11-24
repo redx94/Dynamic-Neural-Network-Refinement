@@ -1,17 +1,46 @@
+import argparse
 import torch
-import torch.nn.functional as F
-from torch.utils.data import DataLoader
+from src.model import DynamicNeuralNetwork
+from src.analyzer import Analyzer
+from src.hybrid_thresholds import HybridThresholds
+from src.visualization import plot_training_metrics
+import wandb
 
-def train_model(model, train_loader, optimizer, total_epochs):
-    for epoch in range(total_epochs):
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train Dynamic Neural Network")
+    parser.add_argument('--config', type=str, help='Path to training configuration file')
+    return parser.parse_args()
+
+def main():
+    args = parse_args()
+    
+    # Initialize W&B
+    wandb.init(project='dynamic_neural_network_refinement', config=args)
+    
+    # Initialize components
+    analyzer = Analyzer()
+    hybrid_thresholds = HybridThresholds(
+        initial_thresholds={'variance': 0.5, 'entropy': 0.5, 'sparsity': 0.5},
+        annealing_start_epoch=5,
+        total_epochs=20
+    )
+    model = DynamicNeuralNetwork(hybrid_thresholds)
+    model.to('cuda' if torch.cuda.is_available() else 'cpu')
+    
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    
+    # Training loop
+    for epoch in range(20):
         model.train()
-        train_loss, train_acc = 0.0, 0.0
-        for batch_idx, (data, labels) in enumerate(train_loader):
-            optimizer.zero_grad()
-            outputs = model(data)
-            loss = F.cross_entropy(outputs, labels)
-            loss.backward()
-            optimizer.step()
-            train_loss += loss.item()
-            train_acc += (outputs.argmax(1) == labels).float().mean().item()
-        print(f"Epoch {epoch + 1}/{total_epochs} - Loss: {train_loss:.4f}, Acc: {train_acc:.4f}")
+        # Training steps...
+        loss = 0.0  # Replace with actual loss computation
+        accuracy = 0.0  # Replace with actual accuracy computation
+        # Log metrics
+        wandb.log({'epoch': epoch, 'loss': loss, 'accuracy': accuracy})
+    
+    # Save final model
+    torch.save(model.state_dict(), 'models/checkpoints/final_model.pth')
+    wandb.finish()
+
+if __name__ == "__main__":
+    main()
