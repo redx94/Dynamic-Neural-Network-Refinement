@@ -42,8 +42,17 @@ class HybridThresholds(nn.Module):
     
     def calculate_statistical_thresholds(self, var, ent, spar):
         thresholds = {
-            'variance': torch.quantile(var, 0.85),
-            'entropy': torch.quantile(ent, 0.85),
-            'sparsity': torch.quantile(spar, 0.85),
+            'variance': {
+                'simple': torch.quantile(var, 0.15),
+                'moderate': torch.quantile(var, 0.85)
+            },
+            'entropy': {
+                'simple': torch.quantile(ent, 0.15),
+                'moderate': torch.quantile(ent, 0.85)
+            },
+            'sparsity': {
+                'simple': torch.quantile(spar, 0.15),
+                'moderate': torch.quantile(spar, 0.85)
+            }
         }
         return thresholds
