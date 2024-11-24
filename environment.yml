@@ -1,0 +1,21 @@
+name: dynamic_nn
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9
+  - pip
+  - pip:
+    - torch>=1.8.0
+    - torchvision
+    - numpy
+    - pandas
+    - matplotlib
+    - seaborn
+    - scikit-learn
+    - pytest
+    - wandb
+    - ray[tune]
+    - plotly
+    - dash
+    - captum
