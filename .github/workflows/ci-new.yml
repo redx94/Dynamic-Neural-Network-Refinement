@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version = ["3.9", "3.10", "3.11"]  # Incorrect: '=' used instead of ':'
 
     steps:
       # Checkout the repository
