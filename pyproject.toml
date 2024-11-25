@@ -7,8 +7,8 @@ license = "GNU Affero General Public License v3.0"
 
 [tool.poetry.dependencies]
 python = "^3.9 || ^3.10 || ^3.11"
-torch = "^1.13"
-torchvision = "^0.14"  # Updated to match the compatible version for PyTorch 1.13
+torch = "1.13.0"
+torchvision = "0.15.1"  # Adjusted version to match compatibility
 PyYAML = ">=6.0"
 wandb = "^0.12.21"
 loguru = "^0.5.3"
@@ -26,15 +26,10 @@ fastapi = "^0.99.0"
 uvicorn = "^0.23.0"
 json-log-formatter = "^0.5.0"
 
-# Remove or adjust the custom PyTorch source, as needed
-#[[tool.poetry.source]]
-#name = "pytorch"
-#url = "https://download.pytorch.org/whl/cpu"
-#priority = "primary"
-
 [tool.poetry.dev-dependencies]
 pre-commit = "^3.0.4"
 
 [build-system]
 requires = ["poetry-core>=1.5.0"]
 build-backend = "poetry.core.masonry.api"
+
