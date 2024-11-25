@@ -1,5 +1,3 @@
-# .github/workflows/ci.yml
-
 name: CI
 
 on:
@@ -14,8 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]  # Correct: ':' used
-
+        python-version: ["3.9", "3.10", "3.11"]
 
     steps:
       # Checkout the repository
@@ -56,6 +53,12 @@ jobs:
         run: |
           dvc remote add -d myremote ${{ secrets.DVC_REMOTE_URL }}
           dvc pull
+
+      # Run Pre-Commit checks
+      - name: Run pre-commit checks
+        run: |
+          pip install pre-commit
+          pre-commit run --all-files
 
       # Lint with flake8
       - name: Lint with flake8
@@ -105,3 +108,4 @@ jobs:
       # Added Debugging Step (Optional)
       - name: Debugging Step
         run: echo "This is a debugging step to ensure the workflow is updated."
+``
