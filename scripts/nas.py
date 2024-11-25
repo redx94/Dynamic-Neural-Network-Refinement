@@ -1,71 +1,121 @@
-# scripts/nas.py
+# src/nas.py
 
-import argparse
 import torch
-from torch.utils.data import DataLoader, TensorDataset
-from src.model import DynamicNeuralNetwork
-from src.hybrid_thresholds import HybridThresholds
-from src.nas import NAS
-from scripts.utils import load_model, setup_logging
-import yaml
+import torch.nn as nn
+import copy
+import random
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Run Neural Architecture Search")
-    parser.add_argument('--config', type=str, help='Path to training configuration file', required=True)
-    parser.add_argument('--model_path', type=str, help='Path to the trained model', required=True)
-    return parser.parse_args()
-
-def load_config(config_path):
-    with open(config_path, 'r') as file:
-        config = yaml.safe_load(file)
-    return config
-
-def main():
-    args = parse_args()
+class NAS:
+    """
+    A simple Neural Architecture Search (NAS) class that mutates model architectures and evaluates them.
+    """
+    def __init__(self, base_model, search_space, device='cpu'):
+        """
+        Initializes the NAS class.
+        
+        Args:
+            base_model (nn.Module): The base model to mutate.
+            search_space (dict): The search space for NAS.
+            device (str): Device to run the models on.
+        """
+        self.base_model = base_model
+        self.search_space = search_space
+        self.device = device
+        self.best_model = None
+        self.best_score = float('-inf')
     
-    # Load configuration
-    config = load_config(args.config)
+    def mutate(self, model):
+        """
+        Applies a random mutation to the model architecture.
+        
+        Args:
+            model (nn.Module): The model to mutate.
+        
+        Returns:
+            nn.Module: The mutated model.
+        """
+        mutated_model = copy.deepcopy(model)
+        mutation_type = random.choice(['add_layer', 'remove_layer', 'increase_units', 'decrease_units'])
+        
+        if mutation_type == 'add_layer' and self.search_space.get('add_layer', False):
+            # Example: Add a new linear layer after layer2
+            new_layer = nn.Linear(256, 128)
+            if hasattr(mutated_model, 'layer3') and isinstance(mutated_model.layer3, nn.Sequential):
+                mutated_model.layer3 = nn.Sequential(
+                    mutated_model.layer3,
+                    new_layer
+                )
+            else:
+                mutated_model.layer3 = nn.Sequential(new_layer)
+        elif mutation_type == 'remove_layer' and self.search_space.get('remove_layer', False):
+            # Example: Remove layer3 if it exists
+            if hasattr(mutated_model, 'layer3'):
+                delattr(mutated_model, 'layer3')
+        elif mutation_type == 'increase_units' and self.search_space.get('increase_units', False):
+            # Example: Increase units in layer1
+            if hasattr(mutated_model.layer1, 'layer'):
+                mutated_model.layer1.layer = nn.Linear(mutated_model.layer1.layer.in_features, 512)
+        elif mutation_type == 'decrease_units' and self.search_space.get('decrease_units', False):
+            # Example: Decrease units in layer1
+            if hasattr(mutated_model.layer1, 'layer'):
+                mutated_model.layer1.layer = nn.Linear(mutated_model.layer1.layer.in_features, 128)
+        
+        return mutated_model
     
-    # Setup logging
-    logger = setup_logging('logs/nas.json.log')
-    logger.info("Starting Neural Architecture Search (NAS)...")
+    def evaluate(self, model, dataloader):
+        """
+        Evaluates the model on the provided dataloader.
+        
+        Args:
+            model (nn.Module): The model to evaluate.
+            dataloader (DataLoader): The dataloader for evaluation.
+        
+        Returns:
+            float: The evaluation score (e.g., accuracy).
+        """
+        model.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for data, labels in dataloader:
+                data, labels = data.to(self.device), labels.to(self.device)
+                # Dummy complexities for evaluation
+                complexities = {
+                    'variance': torch.tensor([0.6]*data.size(0)).to(self.device),
+                    'entropy': torch.tensor([0.6]*data.size(0)).to(self.device),
+                    'sparsity': torch.tensor([0.4]*data.size(0)).to(self.device)
+                }
+                outputs = model(data, complexities)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+        accuracy = correct / total
+        return accuracy
     
-    # Load model
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    hybrid_thresholds = HybridThresholds(
-        initial_thresholds=config['thresholds'],
-        annealing_start_epoch=config['thresholds']['annealing_start_epoch'],
-        total_epochs=config['thresholds']['total_epochs']
-    )
-    base_model = DynamicNeuralNetwork(hybrid_thresholds=hybrid_thresholds).to(device)
-    base_model = load_model(base_model, args.model_path, device)
-    
-    # Define search space (placeholder)
-    search_space = {
-        'add_layer': True,
-        'remove_layer': True,
-        'increase_units': True,
-        'decrease_units': True
-    }
-    
-    # Create dummy dataloader for NAS evaluation
-    # Replace with actual validation data
-    dummy_input = torch.randn(100, config['model']['input_size'])
-    dummy_labels = torch.randint(0, config['model']['output_size'], (100,))
-    dataset = TensorDataset(dummy_input, dummy_labels)
-    dataloader = DataLoader(dataset, batch_size=10)
-    
-    # Initialize NAS
-    nas = NAS(base_model=base_model, search_space=search_space, device=device)
-    
-    # Run NAS
-    best_model = nas.run(dataloader, generations=3, population_size=3)
-    
-    # Save the best model
-    best_model_path = 'models/nas/best_model.pth'
-    torch.save(best_model.state_dict(), best_model_path)
-    logger.info(f"Best model saved at {best_model_path}")
-    print(f"Best model saved at {best_model_path}")
-
-if __name__ == "__main__":
-    main()
+    def run(self, dataloader, generations=5, population_size=5):
+        """
+        Runs the NAS process.
+        
+        Args:
+            dataloader (DataLoader): The dataloader for evaluation.
+            generations (int): Number of generations.
+            population_size (int): Number of models per generation.
+        
+        Returns:
+            nn.Module: The best-performing model found during NAS.
+        """
+        population = [copy.deepcopy(self.base_model) for _ in range(population_size)]
+        
+        for gen in range(generations):
+            print(f"Generation {gen+1}")
+            for i in range(population_size):
+                mutated_model = self.mutate(population[i])
+                mutated_model.to(self.device)
+                score = self.evaluate(mutated_model, dataloader)
+                print(f"Model {i+1} Accuracy: {score}")
+                if score > self.best_score:
+                    self.best_score = score
+                    self.best_model = mutated_model
+            # Optional: Implement selection and reproduction strategies here
+        print(f"Best Accuracy: {self.best_score}")
+        return self.best_model
