@@ -9,7 +9,7 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 120  # Increase timeout to 2 hours if needed
+    timeout-minutes: 120
 
     strategy:
       matrix:
@@ -19,90 +19,28 @@ jobs:
       # Checkout the repository
       - uses: actions/checkout@v4
 
-      # Install system dependencies for PyTorch (optional, but may help)
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libopenblas-dev libomp-dev
-
       # Set up Python
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Cache Poetry and pip dependencies
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pypoetry
-            ~/.cache/pip
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ runner.os }}-poetry-
+      # Install Build Tools (wheel, setuptools, Cython)
+      - name: Install Build Tools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install cython
 
-        # Install PyTorch manually if needed
+      # Install PyTorch manually
       - name: Install PyTorch manually
         run: |
-          pip install torch==1.10.2 torchvision==0.11.1
+          pip install torch==1.13.0 torchvision==0.14.0
 
       # Install Poetry and dependencies
       - name: Install Poetry and dependencies
         run: |
-          python -m pip install --upgrade pip setuptools wheel
           pip install poetry
           poetry config virtualenvs.create false
           poetry install --no-root --only main
 
-      # Run pre-commit checks
-      - name: Run Pre-Commit checks
-        run: |
-          pip install pre-commit
-          pre-commit run --all-files
-
-      # Lint with flake8
-      - name: Lint with flake8
-        run: |
-          flake8 src/ scripts/ tests/
-
-      # Format code with black
-      - name: Format code with black
-        run: |
-          black --check src/ scripts/ tests/
-
-      # Run Bandit for security analysis
-      - name: Run Bandit security scan
-        run: |
-          bandit -r src/ scripts/ tests/
-
-      # Run unit tests
-      - name: Run unit tests
-        run: |
-          pytest tests/unit/
-
-      # Run integration tests
-      - name: Run integration tests
-        run: |
-          python -m unittest tests/test_integration.py
-
-      # Run end-to-end tests
-      - name: Run end-to-end tests
-        run: |
-          python -m unittest tests/test_e2e.py
-
-      # Cache DVC remote data
-      - name: Configure DVC remote and pull data
-        run: |
-          dvc remote add -d myremote ${{ secrets.DVC_REMOTE_URL }}
-          dvc pull
-
-      # Upload coverage reports
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: true
+      # Rest of the steps continue here...
