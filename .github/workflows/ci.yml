@@ -9,7 +9,7 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 120  # Increase timeout to 2 hours if needed
 
     strategy:
       matrix:
@@ -31,10 +31,10 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install cython
 
-      # Install PyTorch manually
-      - name: Install PyTorch manually
+      # Install PyTorch and TorchVision manually with compatible versions
+      - name: Install PyTorch and TorchVision
         run: |
-          pip install torch==1.13.0 torchvision==0.14.0
+          pip install torch==1.13.0 torchvision==0.15.1
 
       # Install Poetry and dependencies
       - name: Install Poetry and dependencies
@@ -43,4 +43,54 @@ jobs:
           poetry config virtualenvs.create false
           poetry install --no-root --only main
 
-      # Rest of the steps continue here...
+      # Run pre-commit checks
+      - name: Run Pre-Commit checks
+        run: |
+          pip install pre-commit
+          pre-commit run --all-files
+
+      # Lint with flake8
+      - name: Lint with flake8
+        run: |
+          flake8 src/ scripts/ tests/
+
+      # Format code with black
+      - name: Format code with black
+        run: |
+          black --check src/ scripts/ tests/
+
+      # Run Bandit for security analysis
+      - name: Run Bandit security scan
+        run: |
+          bandit -r src/ scripts/ tests/
+
+      # Run unit tests
+      - name: Run unit tests
+        run: |
+          pytest tests/unit/
+
+      # Run integration tests
+      - name: Run integration tests
+        run: |
+          python -m unittest tests/test_integration.py
+
+      # Run end-to-end tests
+      - name: Run end-to-end tests
+        run: |
+          python -m unittest tests/test_e2e.py
+
+      # Cache DVC remote data
+      - name: Configure DVC remote and pull data
+        run: |
+          dvc remote add -d myremote ${{ secrets.DVC_REMOTE_URL }}
+          dvc pull
+
+      # Upload coverage reports
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
