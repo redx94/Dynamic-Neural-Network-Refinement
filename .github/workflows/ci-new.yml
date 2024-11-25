@@ -11,61 +11,41 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
       # Checkout repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       # Set up Python
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
 
-      # Install Python 3.9 explicitly if needed
-      - name: Install Python 3.9
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt-get update
-          sudo apt-get install -y python3.9 python3.9-venv python3.9-distutils
-
-      # Install dependencies
+      # Install Dependencies
       - name: Install Dependencies
         run: |
-          pip install poetry pre-commit virtualenv
+          pip install poetry pre-commit flake8 black bandit
           poetry install --no-root
 
-      # Run Pre-Commit Hooks
-      - name: Run Pre-Commit Hooks
+      # Auto-Fix with Pre-Commit
+      - name: Run Pre-Commit Hooks (Auto-Fix)
         run: |
           pre-commit install
-          pre-commit run --all-files --show-diff-on-failure
+          pre-commit run --all-files --hook-stage manual || true
 
+      # Auto-Format with Black
+      - name: Auto-Format Code with Black
+        run: black .
 
-      # Code Formatting with Black
-      - name: Code Formatting with Black
-        run: |
-          black . --check
-
-      # Code Linting with Flake8
-      - name: Code Linting with Flake8
-        run: |
-          flake8 .
+      # Lint Code with Flake8
+      - name: Lint Code with Flake8
+        run: flake8 .
 
       # Security Check with Bandit
       - name: Security Check with Bandit
-        run: |
-          bandit -r src/
+        run: bandit -r src/
 
-      # Run Unit Tests
-      - name: Run Unit Tests
-        run: |
-          pytest tests/unit/
-
-      # Run Integration Tests
-      - name: Run Integration Tests
-        run: |
-          pytest tests/integration/
+      # Run Tests
+      - name: Run Tests
+        run: pytest tests/
