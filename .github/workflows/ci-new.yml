@@ -16,11 +16,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Set up Python
-      - name: Set up Python
+      # Set up Python 3.11 and 3.9
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: 3.11
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
 
       # Install Dependencies
       - name: Install Dependencies
@@ -28,11 +32,11 @@ jobs:
           pip install poetry pre-commit flake8 black bandit
           poetry install --no-root
 
-      # Auto-Fix with Pre-Commit
+      # Auto-Fix with Pre-Commit Hooks (Auto-Fix)
       - name: Run Pre-Commit Hooks (Auto-Fix)
         run: |
           pre-commit install
-          pre-commit run --all-files --hook-stage manual || true
+          pre-commit run --all-files || true
 
       # Auto-Format with Black
       - name: Auto-Format Code with Black
