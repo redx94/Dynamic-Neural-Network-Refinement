@@ -11,11 +11,6 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10", "3.11"]
 
     steps:
       # Checkout repository
@@ -28,22 +23,27 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Install Dependencies
-      - name: Install dependencies
+      # Install Python 3.9 explicitly if needed
+      - name: Install Python 3.9
         run: |
-          pip install --upgrade pip
-          pip install poetry pre-commit flake8 black bandit
-          poetry install --no-root
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository ppa:deadsnakes/ppa
+          sudo apt-get update
+          sudo apt-get install -y python3.9 python3.9-venv python3.9-distutils
 
-      # Verify Pre-Commit Installation
-      - name: Check Pre-Commit Version
-        run: pre-commit --version
+      # Install dependencies
+      - name: Install Dependencies
+        run: |
+          pip install poetry pre-commit virtualenv
+          poetry install --no-root
 
       # Run Pre-Commit Hooks
       - name: Run Pre-Commit Hooks
         run: |
           pre-commit install
           pre-commit run --all-files --show-diff-on-failure
+
 
       # Code Formatting with Black
       - name: Code Formatting with Black
