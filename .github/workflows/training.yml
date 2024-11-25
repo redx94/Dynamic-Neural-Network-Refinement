@@ -28,7 +28,7 @@ jobs:
           python scripts/train.py --config config/train_config.yaml
 
       - name: Upload training logs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: training-logs
           path: logs/train.json.log
