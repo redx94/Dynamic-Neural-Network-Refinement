@@ -11,34 +11,25 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10", "3.11"]
-      fail-fast: true
-
     steps:
-      # Cache Python dependencies
-      - name: Cache Python dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ matrix.python-version }}
+      # Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Debug file existence
+      - name: Debug File Existence
+        run: ls -R
 
       # Set up Python
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
 
       # Install dependencies
       - name: Install dependencies
         run: |
-          pip install poetry pre-commit virtualenv
+          pip install poetry
           poetry install
 
       # Add Python 3.9 for Pre-Commit (if needed)
