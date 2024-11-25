@@ -1,3 +1,5 @@
+# .github/workflows/ci.yml
+
 name: CI
 
 on:
@@ -25,9 +27,44 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest
+          pip install poetry
+          poetry install --no-root
+          pip install pytest flake8 black bandit
 
-      - name: Run tests
+      - name: Configure DVC remote
         run: |
-          pytest tests/
+          dvc remote add -d myremote ${{ secrets.DVC_REMOTE_URL }}
+          dvc pull
+
+      - name: Lint with flake8
+        run: |
+          flake8 src/ scripts/ tests/
+
+      - name: Format code with black
+        run: |
+          black --check src/ scripts/ tests/
+
+      - name: Run Bandit security scan
+        run: |
+          bandit -r src/ scripts/ tests/
+
+      - name: Run unit tests
+        run: |
+          pytest tests/unit/
+
+      - name: Run integration tests
+        run: |
+          python -m unittest tests/test_integration.py
+
+      - name: Run end-to-end tests
+        run: |
+          python -m unittest tests/test_e2e.py
+
+      - name: Validate data
+        run: |
+          python scripts/validate_data.py --suite your_suite_name --data_path data/processed/your_dataset_processed.csv
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
