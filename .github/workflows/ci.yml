@@ -17,54 +17,86 @@ jobs:
         python-version: [3.8, 3.9, 3.10]
 
     steps:
+      # Checkout the repository
       - uses: actions/checkout@v4
 
+      # Set up Python
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
+      # Verify Python version
+      - name: Verify Python version
+        run: python --version
+
+      # Cache Poetry dependencies
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pypoetry
+            ~/.cache/pip
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      # Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install poetry
-          poetry install --no-root
-          pip install pytest flake8 black bandit
+          poetry config virtualenvs.create false
+          poetry install --no-root --only main
+          pip install pytest flake8 black bandit dvc
 
+      # Configure DVC remote
       - name: Configure DVC remote
         run: |
           dvc remote add -d myremote ${{ secrets.DVC_REMOTE_URL }}
           dvc pull
 
+      # Lint with flake8
       - name: Lint with flake8
         run: |
           flake8 src/ scripts/ tests/
 
+      # Format code with black
       - name: Format code with black
         run: |
           black --check src/ scripts/ tests/
 
+      # Run Bandit security scan
       - name: Run Bandit security scan
         run: |
           bandit -r src/ scripts/ tests/
 
+      # Run unit tests
       - name: Run unit tests
         run: |
           pytest tests/unit/
 
+      # Run integration tests
       - name: Run integration tests
         run: |
           python -m unittest tests/test_integration.py
 
+      # Run end-to-end tests
       - name: Run end-to-end tests
         run: |
           python -m unittest tests/test_e2e.py
 
+      # Validate data
       - name: Validate data
         run: |
           python scripts/validate_data.py --suite your_suite_name --data_path data/processed/your_dataset_processed.csv
 
+      # Upload coverage to Codecov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
