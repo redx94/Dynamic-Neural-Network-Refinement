@@ -7,8 +7,8 @@ license = "GNU Affero General Public License v3.0"
 
 [tool.poetry.dependencies]
 python = "^3.9 || ^3.10 || ^3.11"
-torch = { version = "1.10.2", source = "pytorch" }
-torchvision = { version = "^0.11.1", source = "pytorch" }
+torch = "^1.10"  # Relax version constraint to allow flexibility
+torchvision = "^0.11"  # Relax version constraint for compatibility
 PyYAML = ">=6.0"
 wandb = "^0.12.21"
 loguru = "^0.5.3"
@@ -26,10 +26,12 @@ fastapi = "^0.99.0"
 uvicorn = "^0.23.0"
 json-log-formatter = "^0.5.0"
 
-[[tool.poetry.source]]
-name = "pytorch"
-url = "https://download.pytorch.org/whl/cpu"
-priority = "supplemental"  # Replaced 'default' with 'priority'
+# Removing the PyTorch custom source to allow default PyPI indexing
+# or change priority to "primary" if you require this repository for your CI/CD setup
+#[[tool.poetry.source]]
+#name = "pytorch"
+#url = "https://download.pytorch.org/whl/cpu"
+#priority = "primary"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^3.0.4"
