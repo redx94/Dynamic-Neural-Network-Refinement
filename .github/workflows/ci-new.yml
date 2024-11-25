@@ -19,6 +19,12 @@ jobs:
       # Checkout the repository
       - uses: actions/checkout@v4
 
+      # Install system dependencies for PyTorch (optional, but may help)
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopenblas-dev libomp-dev
+
       # Set up Python
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -36,14 +42,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-poetry-
 
-      # Install Build Tools (wheel, setuptools)
-      - name: Install Build Tools
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-
       # Install Poetry and dependencies
       - name: Install Poetry and dependencies
         run: |
+          python -m pip install --upgrade pip setuptools wheel
           pip install poetry
           poetry config virtualenvs.create false
           poetry install --no-root --only main
