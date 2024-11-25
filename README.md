@@ -1,7 +1,7 @@
 # Dynamic Neural Network Refinement
 
 ![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)
-![Build Status](https://github.com/redx94/Dynamic-Neural-Network-Refinement/actions/workflows/main.yml/badge.svg)
+[![CI](https://github.com/redx94/Dynamic-Neural-Network-Refinement/actions/workflows/ci-new.yml/badge.svg)](https://github.com/redx94/Dynamic-Neural-Network-Refinement/actions/workflows/ci-new.yml)
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)
 ![Docker](https://img.shields.io/badge/docker-supported-brightgreen.svg)
 
