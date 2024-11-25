@@ -8,7 +8,7 @@ license = "GNU Affero General Public License v3.0"
 [tool.poetry.dependencies]
 python = "^3.9 || ^3.10 || ^3.11"
 torch = { version = "1.10.2", source = "pytorch" }
-torchvision = "^0.11.1"
+torchvision = { version = "^0.11.1", source = "pytorch" }
 PyYAML = ">=6.0"
 wandb = "^0.12.21"
 loguru = "^0.5.3"
@@ -29,8 +29,7 @@ json-log-formatter = "^0.5.0"
 [[tool.poetry.source]]
 name = "pytorch"
 url = "https://download.pytorch.org/whl/cpu"
-default = false
-
+priority = "supplemental"  # Replaced 'default' with 'priority'
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^3.0.4"
