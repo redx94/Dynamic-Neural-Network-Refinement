@@ -1,47 +1,59 @@
-import torch.quantization as quant
+# scripts/quantize.py
+
+import argparse
 import torch
 from src.model import DynamicNeuralNetwork
+from src.hybrid_thresholds import HybridThresholds
+from scripts.utils import load_model, save_model, setup_logging
+import yaml
+import os
 
-def apply_quantization(model, calibration_loader):
-    """
-    Apply post-training static quantization to the model.
-    """
+def parse_args():
+    parser = argparse.ArgumentParser(description="Quantize Dynamic Neural Network")
+    parser.add_argument('--config', type=str, help='Path to training configuration file', required=True)
+    parser.add_argument('--model_path', type=str, help='Path to the trained model', required=True)
+    parser.add_argument('--quantized_model_path', type=str, help='Path to save the quantized model', default='models/quantized/quantized_model.pth')
+    return parser.parse_args()
+
+def load_config(config_path):
+    with open(config_path, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
+
+def quantize_model(model):
     model.eval()
-    model.qconfig = quant.get_default_qconfig('fbgemm')
-    
-    # Fuse modules if necessary
-    # Example:
-    # model = torch.quantization.fuse_modules(model, [['conv1', 'bn1', 'relu1'], ['conv2', 'bn2', 'relu2']])
-    
-    # Prepare the model for static quantization
-    quantized_model = quant.prepare(model, inplace=False)
-    
-    # Calibrate with calibration data
-    with torch.no_grad():
-        for data, _ in calibration_loader:
-            data = data.to('cuda' if torch.cuda.is_available() else 'cpu')
-            outputs = quantized_model(data)
-    
-    # Convert to quantized model
-    quantized_model = quant.convert(quantized_model, inplace=False)
-    
-    return quantized_model
+    model_quantized = torch.quantization.quantize_dynamic(
+        model, {torch.nn.Linear}, dtype=torch.qint8
+    )
+    return model_quantized
 
 def main():
-    model = DynamicNeuralNetwork(None)  # Pass appropriate thresholds or handle within the model
-    model.load_state_dict(torch.load('models/pruned/pruned_model.pth'))
-    model.to('cpu')  # Quantization is typically done on CPU
+    args = parse_args()
     
-    # Assume calibration_loader is defined
-    calibration_loader = None  # Define your calibration data loader here
+    # Load configuration
+    config = load_config(args.config)
     
-    if calibration_loader is None:
-        print("Please define the calibration_loader in the script.")
-        return
+    # Setup logging
+    logger = setup_logging('logs/quantize.json.log')
+    logger.info("Starting quantization process...")
     
-    quantized_model = apply_quantization(model, calibration_loader)
+    # Load model
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    hybrid_thresholds = HybridThresholds(
+        initial_thresholds=config['thresholds'],
+        annealing_start_epoch=config['thresholds']['annealing_start_epoch'],
+        total_epochs=config['thresholds']['total_epochs']
+    )
+    model = DynamicNeuralNetwork(hybrid_thresholds=hybrid_thresholds).to(device)
+    model = load_model(model, args.model_path, device)
     
-    torch.save(quantized_model.state_dict(), 'models/quantized/quantized_model.pth')
+    # Quantize the model
+    quantized_model = quantize_model(model)
+    
+    # Save quantized model
+    os.makedirs(os.path.dirname(args.quantized_model_path), exist_ok=True)
+    save_model(quantized_model, args.quantized_model_path)
+    logger.info(f"Quantized model saved at {args.quantized_model_path}")
 
 if __name__ == "__main__":
     main()
