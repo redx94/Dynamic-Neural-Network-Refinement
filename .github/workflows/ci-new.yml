@@ -36,16 +36,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-poetry-
 
-      # Install Poetry
-      - name: Install Poetry
+      # Install Poetry and dependencies
+      - name: Install Poetry and dependencies
         run: |
           python -m pip install --upgrade pip
           pip install poetry
           poetry config virtualenvs.create false
-
-      # Install dependencies using Poetry
-      - name: Install dependencies
-        run: |
+          # Install PyYAML without PEP 517
+          pip install --no-build-isolation --no-binary :all: pyyaml==6.0
           poetry install --no-root --only main
 
       # Run pre-commit checks
@@ -69,7 +67,7 @@ jobs:
         run: |
           bandit -r src/ scripts/ tests/
 
-      # Run tests
+      # Run unit tests
       - name: Run unit tests
         run: |
           pytest tests/unit/
