@@ -11,14 +11,16 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
     steps:
-      # Checkout the repository
+      # Checkout repository
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      # Debug file existence
-      - name: Debug File Existence
-        run: ls -R
 
       # Set up Python
       - name: Set up Python ${{ matrix.python-version }}
@@ -26,34 +28,19 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Install dependencies
+      # Install Dependencies
       - name: Install dependencies
         run: |
-          pip install poetry
-          poetry install
+          pip install --upgrade pip
+          pip install poetry pre-commit
+          poetry install --no-root
 
-      # Add Python 3.9 for Pre-Commit (if needed)
-      - name: Install Python 3.9 for Pre-Commit
-        if: ${{ matrix.python-version == '3.11' }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt-get update
-          sudo apt-get install -y python3.9 python3.9-venv python3.9-distutils
+      # Verify Pre-Commit Installation
+      - name: Check Pre-Commit Version
+        run: pre-commit --version
 
-      # Run Pre-Commit Hooks (on changed files)
+      # Run Pre-Commit Hooks
       - name: Run Pre-Commit Hooks
         run: |
           pre-commit install
-          pre-commit run --from-ref HEAD~1 --to-ref HEAD
-
-      # Run Unit Tests
-      - name: Run Unit Tests
-        run: |
-          pytest tests/unit/
-
-      # Run Integration Tests
-      - name: Run Integration Tests
-        run: |
-          pytest tests/integration/
+          pre-commit run --all-files --show-diff-on-failure
