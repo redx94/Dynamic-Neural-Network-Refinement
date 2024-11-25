@@ -1,58 +1,59 @@
-import math
+# src/hybrid_thresholds.py
+
 import torch
-import torch.nn as nn
 
-def cosine_annealing(epoch, total_epochs, annealing_start_epoch):
-    if epoch < annealing_start_epoch:
-        return 0.0
-    progress = (epoch - annealing_start_epoch) / (total_epochs - annealing_start_epoch)
-    return 0.5 * (1 + math.cos(math.pi * progress))
+class HybridThresholds:
+    """
+    Handles dynamic threshold adjustments based on annealing schedule.
+    """
 
-class LearnableThresholds(nn.Module):
-    def __init__(self, initial_values):
-        super(LearnableThresholds, self).__init__()
-        self.threshold_variance = nn.Parameter(torch.tensor(initial_values['variance']))
-        self.threshold_entropy = nn.Parameter(torch.tensor(initial_values['entropy']))
-        self.threshold_sparsity = nn.Parameter(torch.tensor(initial_values['sparsity']))
-    
-    def forward(self, var, ent, spar):
-        return {
-            'variance': self.threshold_variance,
-            'entropy': self.threshold_entropy,
-            'sparsity': self.threshold_sparsity
-        }
-
-class HybridThresholds(nn.Module):
     def __init__(self, initial_thresholds, annealing_start_epoch, total_epochs):
-        super(HybridThresholds, self).__init__()
-        self.learnable_thresholds = LearnableThresholds(initial_thresholds)
+        """
+        Initializes the HybridThresholds class.
+
+        Args:
+            initial_thresholds (dict): Initial thresholds for variance, entropy, and sparsity.
+            annealing_start_epoch (int): Epoch to start annealing.
+            total_epochs (int): Total number of epochs for annealing.
+        """
+        self.initial_thresholds = initial_thresholds
         self.annealing_start_epoch = annealing_start_epoch
         self.total_epochs = total_epochs
-    
-    def forward(self, var, ent, spar, current_epoch):
-        annealing_weight = cosine_annealing(current_epoch, self.total_epochs, self.annealing_start_epoch)
-        statistical_thresholds = self.calculate_statistical_thresholds(var, ent, spar)
-        learnable_complexities = self.learnable_thresholds(var, ent, spar)
-        combined_complexities = {
-            key: annealing_weight * learnable_complexities[key] + 
-                  (1 - annealing_weight) * statistical_thresholds[key]
-            for key in statistical_thresholds
+
+    def anneal_thresholds(self, current_epoch):
+        """
+        Calculates the current thresholds based on the annealing schedule.
+
+        Args:
+            current_epoch (int): The current training epoch.
+
+        Returns:
+            dict: Updated thresholds.
+        """
+        if current_epoch < self.annealing_start_epoch:
+            return self.initial_thresholds
+        else:
+            progress = (current_epoch - self.annealing_start_epoch) / (self.total_epochs - self.annealing_start_epoch)
+            annealed_thresholds = {k: v * (1 - progress) for k, v in self.initial_thresholds.items()}
+            return annealed_thresholds
+
+    def __call__(self, variance, entropy, sparsity, current_epoch):
+        """
+        Updates thresholds based on the current epoch and applies them to the complexities.
+
+        Args:
+            variance (torch.Tensor): Variance tensor.
+            entropy (torch.Tensor): Entropy tensor.
+            sparsity (torch.Tensor): Sparsity tensor.
+            current_epoch (int): The current training epoch.
+
+        Returns:
+            dict: Thresholded complexities.
+        """
+        thresholds = self.anneal_thresholds(current_epoch)
+        thresholded = {
+            'variance': variance > thresholds['variance'],
+            'entropy': entropy > thresholds['entropy'],
+            'sparsity': sparsity < thresholds['sparsity']
         }
-        return combined_complexities
-    
-    def calculate_statistical_thresholds(self, var, ent, spar):
-        thresholds = {
-            'variance': {
-                'simple': torch.quantile(var, 0.15),
-                'moderate': torch.quantile(var, 0.85)
-            },
-            'entropy': {
-                'simple': torch.quantile(ent, 0.15),
-                'moderate': torch.quantile(ent, 0.85)
-            },
-            'sparsity': {
-                'simple': torch.quantile(spar, 0.15),
-                'moderate': torch.quantile(spar, 0.85)
-            }
-        }
-        return thresholds
+        return thresholded
