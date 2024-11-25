@@ -31,10 +31,10 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install cython
 
-      # Install PyTorch and TorchVision manually with compatible versions
+      # Install Compatible Versions of PyTorch and TorchVision
       - name: Install PyTorch and TorchVision
         run: |
-          pip install torch==1.13.0 torchvision==0.15.1
+          pip install torch==2.0.0 torchvision==0.15.1
 
       # Install Poetry and dependencies
       - name: Install Poetry and dependencies
