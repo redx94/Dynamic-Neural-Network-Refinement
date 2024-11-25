@@ -65,6 +65,6 @@ jobs:
           python scripts/validate_data.py --suite your_suite_name --data_path data/processed/your_dataset_processed.csv
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
