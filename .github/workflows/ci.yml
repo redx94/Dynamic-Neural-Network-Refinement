@@ -42,6 +42,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-poetry-
 
+        # Install PyTorch manually if needed
+      - name: Install PyTorch manually
+        run: |
+          pip install torch==1.10.2 torchvision==0.11.1
+
       # Install Poetry and dependencies
       - name: Install Poetry and dependencies
         run: |
