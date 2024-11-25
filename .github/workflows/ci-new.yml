@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install poetry pre-commit
+          pip install poetry pre-commit flake8 black bandit
           poetry install --no-root
 
       # Verify Pre-Commit Installation
@@ -44,3 +44,28 @@ jobs:
         run: |
           pre-commit install
           pre-commit run --all-files --show-diff-on-failure
+
+      # Code Formatting with Black
+      - name: Code Formatting with Black
+        run: |
+          black . --check
+
+      # Code Linting with Flake8
+      - name: Code Linting with Flake8
+        run: |
+          flake8 .
+
+      # Security Check with Bandit
+      - name: Security Check with Bandit
+        run: |
+          bandit -r src/
+
+      # Run Unit Tests
+      - name: Run Unit Tests
+        run: |
+          pytest tests/unit/
+
+      # Run Integration Tests
+      - name: Run Integration Tests
+        run: |
+          pytest tests/integration/
