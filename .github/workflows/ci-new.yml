@@ -36,15 +36,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-poetry-
 
+      # Install Build Tools (wheel, setuptools, Cython)
+      - name: Install Build Tools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install cython  # Adding Cython if it's required by PyYAML for building wheels
+
       # Install Poetry and dependencies
       - name: Install Poetry and dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install wheel  # Install wheel to support building from source
           pip install poetry
           poetry config virtualenvs.create false
-          # Install PyYAML with explicit flags to bypass PEP 517 issues
-          pip install --no-binary :all: pyyaml==6.0
+          # Install PyYAML without PEP 517 and any other dependencies
+          pip install --no-build-isolation --no-binary :all: pyyaml==6.0
           poetry install --no-root --only main
 
       # Run pre-commit checks
@@ -56,25 +60,21 @@ jobs:
       # Lint with flake8
       - name: Lint with flake8
         run: |
-          pip install flake8
           flake8 src/ scripts/ tests/
 
       # Format code with black
       - name: Format code with black
         run: |
-          pip install black
           black --check src/ scripts/ tests/
 
       # Run Bandit for security analysis
       - name: Run Bandit security scan
         run: |
-          pip install bandit
           bandit -r src/ scripts/ tests/
 
       # Run unit tests
       - name: Run unit tests
         run: |
-          pip install pytest
           pytest tests/unit/
 
       - name: Run integration tests
