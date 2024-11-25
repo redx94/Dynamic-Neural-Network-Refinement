@@ -5,7 +5,7 @@ name = "dynamic-neural-network-refinement"
 version = "0.2.0"
 description = "A project for dynamic neural network refinement with state-of-the-art practices."
 authors = ["Reece Dixon <qtt@null.net>"]
-license = ""
+license = "GNU Affero General Public License v3.0"
 
 [tool.poetry.dependencies]
 python = "^3.9"
