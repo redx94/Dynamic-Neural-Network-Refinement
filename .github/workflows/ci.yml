@@ -37,7 +37,7 @@ jobs:
           path: |
             ~/.cache/pypoetry
             ~/.cache/pip
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}-${{ matrix.python-version }}
           restore-keys: |
             ${{ runner.os }}-poetry-
 
@@ -100,3 +100,7 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: true
+
+      # Added Debugging Step (Optional)
+      - name: Debugging Step
+        run: echo "This is a debugging step to ensure the workflow is updated."
