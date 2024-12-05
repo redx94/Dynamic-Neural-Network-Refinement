@@ -34,7 +34,7 @@ forks](/redx94/Dynamic-Neural-Network-Refinement/forks) [Branches](/redx94/Dynam
 
 main
 
-[**1** Branch](/redx94/Dynamic-Neural-Network-Refinement/branches) [**0** Tags](/redx94/Dynamic-Neural-Network-Refinement/tags)
+[Branches](/redx94/Dynamic-Neural-Network-Refinement/branches) [Tags](/redx94/Dynamic-Neural-Network-Refinement/tags)
 
 [Go to Branches page](/redx94/Dynamic-Neural-Network-Refinement/branches)[Go to Tags page](/redx94/Dynamic-Neural-Network-Refinement/tags)
 
@@ -46,7 +46,7 @@ Code
 
 | Name | Name | Last commit message | Last commit date |
 | --- | --- | --- | --- |
-| ## Latest commit<br>## History<br>[178 Commits](/redx94/Dynamic-Neural-Network-Refinement/commits/main/) |
+| ## Latest commit<br>[![redx94](https://avatars.githubusercontent.com/u/84244886?v=4&size=40)](/redx94)[redx94](/redx94/Dynamic-Neural-Network-Refinement/commits?author=redx94)<br>[Update ci-new.yml](/redx94/Dynamic-Neural-Network-Refinement/commit/bcfdcb9249a00fc034efc3ad0c2b558cf65fd15c)<br>Nov 25, 2024<br>[bcfdcb9](/redx94/Dynamic-Neural-Network-Refinement/commit/bcfdcb9249a00fc034efc3ad0c2b558cf65fd15c) · Nov 25, 2024<br>## History<br>[178 Commits](/redx94/Dynamic-Neural-Network-Refinement/commits/main/) |
 | [.github](/redx94/Dynamic-Neural-Network-Refinement/tree/main/.github ".github") | [.github](/redx94/Dynamic-Neural-Network-Refinement/tree/main/.github ".github") |  |  |
 | [config](/redx94/Dynamic-Neural-Network-Refinement/tree/main/config "config") | [config](/redx94/Dynamic-Neural-Network-Refinement/tree/main/config "config") |  |  |
 | [data](/redx94/Dynamic-Neural-Network-Refinement/tree/main/data "data") | [data](/redx94/Dynamic-Neural-Network-Refinement/tree/main/data "data") |  |  |
