@@ -1,5 +1,0 @@
-# Configuration file for Dynamic Neural Network Refinement
-total_epochs: 50
-batch_size: 64
-learning_rate: 0.001
-annealing_start_epoch: 5

@@ -1,3 +1,6 @@
-# src/__init__.py
+"""
+Dynamic Neural Network Refinement package.
+This package contains modules for dynamic neural network architecture refinement.
+"""
 
-# This file makes 'src' a Python package.
+__version__ = "0.2.1"
