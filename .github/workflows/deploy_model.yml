@@ -1,0 +1,36 @@
+# .github/workflows/deploy_model.yml
+
+name: Deploy Model
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'models/final/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install --no-root
+
+      - name: Deploy to AWS S3
+        run: |
+          aws s3 cp models/final/model_v1.0_final.pth s3://your-bucket/models/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}

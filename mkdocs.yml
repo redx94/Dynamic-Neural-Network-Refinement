@@ -1,0 +1,33 @@
+# mkdocs.yml
+
+site_name: Dynamic Neural Network Refinement
+site_url: https://redx94.github.io/Dynamic-Neural-Network-Refinement/
+repo_url: https://github.com/redx94/Dynamic-Neural-Network-Refinement
+repo_name: GitHub
+
+theme:
+  name: material
+  palette:
+    primary: 'indigo'
+    accent: 'indigo'
+
+nav:
+  - Home: index.md
+  - Getting Started: getting_started.md
+  - API Documentation: API_documentation.md
+  - Best Practices: best_practices.md
+  - License Information: license_information.md
+  - Tutorials:
+      - Example Tutorial: tutorials/example_tutorial.md
+
+plugins:
+  - search
+  - mkdocs-material-extensions:
+      - live_codeblock
+      - toc.autolink
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed

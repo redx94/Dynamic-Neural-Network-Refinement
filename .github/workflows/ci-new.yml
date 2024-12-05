@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Set up Python 3.11 and 3.9
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      # Install Dependencies
+      - name: Install Dependencies
+        run: |
+          pip install poetry pre-commit flake8 black bandit
+          poetry install --no-root
+
+      # Auto-Fix with Pre-Commit Hooks (Auto-Fix)
+      - name: Run Pre-Commit Hooks (Auto-Fix)
+        run: |
+          pre-commit install
+          pre-commit run --all-files || true
+
+      # Auto-Format with Black
+      - name: Auto-Format Code with Black
+        run: black .
+
+      # Lint Code with Flake8
+      - name: Lint Code with Flake8
+        run: flake8 .
+
+      # Security Check with Bandit
+      - name: Security Check with Bandit
+        run: bandit -r src/
+
+      # Run Tests
+      - name: Run Tests
+        run: pytest tests/

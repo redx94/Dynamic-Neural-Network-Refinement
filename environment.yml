@@ -1,0 +1,11 @@
+# environment.yml
+
+name: dynamic_nn_env
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9
+  - pip
+  - pip:
+    - poetry

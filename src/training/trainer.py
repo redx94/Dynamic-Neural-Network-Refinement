@@ -1,128 +1,151 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
-from typing import Dict, List, Tuple, Optional
-import numpy as np
+from typing import Dict, Any
+from loguru import logger
 from src.models.neural_network import DynamicNeuralNetwork
-from src.models.refinement import NetworkRefinement
+from src.models.hybrid_thresholds import HybridThresholds
+from src.models.analyzer import Analyzer
 
 class Trainer:
-    def __init__(self, 
-                 model: DynamicNeuralNetwork,
-                 optimizer: Optional[torch.optim.Optimizer] = None,
-                 criterion: Optional[nn.Module] = None,
-                 device: str = 'cpu'):
+    """
+    Trainer class for the Dynamic Neural Network.
+    """
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        
+        # Initialize components
+        self.model = DynamicNeuralNetwork(
+            input_dim=config['model']['input_dim'],
+            hidden_dims=config['model']['hidden_dims'],
+            output_dim=config['model']['output_dim']
+        ).to(self.device)
+        
+        self.hybrid_thresholds = HybridThresholds(
+            initial_thresholds=config['thresholds'],
+            annealing_start_epoch=config['training']['annealing_start_epoch'],
+            total_epochs=config['training']['epochs']
+        )
+        
+        self.analyzer = Analyzer()
+        
+        # Setup loss and optimizer
+        self.criterion = nn.CrossEntropyLoss()
+        self.optimizer = optim.Adam(
+            self.model.parameters(),
+            lr=config['training']['learning_rate']
+        )
+        
+    def train_epoch(self, dataloader: torch.utils.data.DataLoader, epoch: int) -> Dict[str, float]:
         """
-        Initialize the trainer
-        
-        Args:
-            model: The neural network model to train
-            optimizer: Optional optimizer (default: Adam)
-            criterion: Optional loss function (default: MSELoss)
-            device: Device to train on (default: 'cpu')
+        Train for one epoch.
         """
-        self.model = model
-        self.device = device
-        self.model.to(device)
-        
-        # Default optimizer and loss function if not provided
-        self.optimizer = optimizer or optim.Adam(model.parameters())
-        self.criterion = criterion or nn.MSELoss()
-        
-        # Initialize refinement module
-        self.refinement = NetworkRefinement(model)
-        
-        # Training history
-        self.history: Dict[str, List[float]] = {
-            'train_loss': [],
-            'val_loss': [],
-            'learning_rate': []
-        }
-        
-    def train_epoch(self, train_loader: DataLoader) -> float:
-        """Train for one epoch"""
         self.model.train()
-        total_loss = 0
+        total_loss = 0.0
+        correct = 0
+        total = 0
         
-        for batch_X, batch_y in train_loader:
-            batch_X = batch_X.to(self.device)
-            batch_y = batch_y.to(self.device)
+        for batch_idx, (data, targets) in enumerate(dataloader):
+            data, targets = data.to(self.device), targets.to(self.device)
+            
+            # Compute complexity metrics
+            complexities = self.analyzer.analyze(data)
+            thresholded = self.hybrid_thresholds(
+                complexities['variance'],
+                complexities['entropy'],
+                complexities['sparsity'],
+                current_epoch=epoch
+            )
             
             # Forward pass
             self.optimizer.zero_grad()
-            outputs = self.model(batch_X)
-            loss = self.criterion(outputs, batch_y)
+            outputs = self.model(data, thresholded)
+            loss = self.criterion(outputs, targets)
             
             # Backward pass
             loss.backward()
             self.optimizer.step()
             
+            # Statistics
             total_loss += loss.item()
+            _, predicted = outputs.max(1)
+            total += targets.size(0)
+            correct += predicted.eq(targets).sum().item()
             
-        return total_loss / len(train_loader)
+            if batch_idx % self.config['training']['log_interval'] == 0:
+                logger.info(f'Epoch: {epoch}, Batch: {batch_idx}, Loss: {loss.item():.4f}')
+        
+        return {
+            'loss': total_loss / len(dataloader),
+            'accuracy': 100. * correct / total
+        }
     
-    def validate(self, val_loader: DataLoader) -> float:
-        """Validate the model"""
+    def validate(self, dataloader: torch.utils.data.DataLoader) -> Dict[str, float]:
+        """
+        Validate the model.
+        """
         self.model.eval()
-        total_loss = 0
+        total_loss = 0.0
+        correct = 0
+        total = 0
         
         with torch.no_grad():
-            for batch_X, batch_y in val_loader:
-                batch_X = batch_X.to(self.device)
-                batch_y = batch_y.to(self.device)
+            for data, targets in dataloader:
+                data, targets = data.to(self.device), targets.to(self.device)
                 
-                outputs = self.model(batch_X)
-                loss = self.criterion(outputs, batch_y)
+                # Compute complexity metrics
+                complexities = self.analyzer.analyze(data)
+                thresholded = self.hybrid_thresholds(
+                    complexities['variance'],
+                    complexities['entropy'],
+                    complexities['sparsity'],
+                    current_epoch=self.config['training']['epochs']  # Use final thresholds
+                )
+                
+                outputs = self.model(data, thresholded)
+                loss = self.criterion(outputs, targets)
+                
                 total_loss += loss.item()
-                
-        return total_loss / len(val_loader)
-    
-    def train(self, 
-              train_loader: DataLoader,
-              val_loader: DataLoader,
-              epochs: int = 100,
-              refinement_frequency: int = 5) -> Dict[str, List[float]]:
-        """
-        Train the model
+                _, predicted = outputs.max(1)
+                total += targets.size(0)
+                correct += predicted.eq(targets).sum().item()
         
-        Args:
-            train_loader: Training data loader
-            val_loader: Validation data loader
-            epochs: Number of epochs to train
-            refinement_frequency: How often to apply refinement
-            
-        Returns:
-            Dictionary containing training history
+        return {
+            'val_loss': total_loss / len(dataloader),
+            'val_accuracy': 100. * correct / total
+        }
+    
+    def train(self, train_loader: torch.utils.data.DataLoader, 
+             val_loader: torch.utils.data.DataLoader) -> Dict[str, list]:
         """
-        for epoch in range(epochs):
-            # Training phase
-            train_loss = self.train_epoch(train_loader)
+        Complete training process.
+        """
+        history = {
+            'train_loss': [], 'train_acc': [],
+            'val_loss': [], 'val_acc': []
+        }
+        
+        for epoch in range(1, self.config['training']['epochs'] + 1):
+            # Train
+            train_metrics = self.train_epoch(train_loader, epoch)
             
-            # Validation phase
-            val_loss = self.validate(val_loader)
+            # Validate
+            val_metrics = self.validate(val_loader)
             
-            # Save metrics
-            self.history['train_loss'].append(train_loss)
-            self.history['val_loss'].append(val_loss)
-            self.history['learning_rate'].append(
-                self.optimizer.param_groups[0]['lr']
+            # Log metrics
+            logger.info(
+                f"Epoch {epoch}/{self.config['training']['epochs']} - "
+                f"Loss: {train_metrics['loss']:.4f} - "
+                f"Acc: {train_metrics['accuracy']:.2f}% - "
+                f"Val Loss: {val_metrics['val_loss']:.4f} - "
+                f"Val Acc: {val_metrics['val_accuracy']:.2f}%"
             )
             
-            # Refinement phase
-            if epoch > 0 and epoch % refinement_frequency == 0:
-                made_changes = self.refinement.refine_architecture()
-                if made_changes:
-                    # Reinitialize optimizer if architecture changed
-                    self.optimizer = optim.Adam(self.model.parameters())
-            
-            # Print progress
-            print(f'Epoch {epoch+1}/{epochs}:')
-            print(f'Train Loss: {train_loss:.4f}')
-            print(f'Val Loss: {val_loss:.4f}')
-            
-        return self.history
-    
-    def get_learning_curves(self) -> Tuple[List[float], List[float]]:
-        """Return learning curves data"""
-        return (self.history['train_loss'], self.history['val_loss'])
+            # Store metrics
+            history['train_loss'].append(train_metrics['loss'])
+            history['train_acc'].append(train_metrics['accuracy'])
+            history['val_loss'].append(val_metrics['val_loss'])
+            history['val_acc'].append(val_metrics['val_accuracy'])
+        
+        return history
