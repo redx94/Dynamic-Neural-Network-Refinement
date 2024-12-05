@@ -74,7 +74,20 @@ class Trainer:
             correct += predicted.eq(targets).sum().item()
             
             if batch_idx % self.config['training']['log_interval'] == 0:
-                logger.info(f'Epoch: {epoch}, Batch: {batch_idx}, Loss: {loss.item():.4f}')
+                # Log detailed metrics
+                current_thresholds = self.hybrid_thresholds.get_current_thresholds()
+                complexity_stats = {
+                    'variance': complexities['variance'].mean().item(),
+                    'entropy': complexities['entropy'].mean().item(),
+                    'sparsity': complexities['sparsity'].mean().item()
+                }
+                progress = (batch_idx + 1) / len(dataloader) * 100
+                logger.info(
+                    f'Epoch: {epoch}/{self.config["training"]["epochs"]} [{batch_idx}/{len(dataloader)} ({progress:.1f}%)] | '
+                    f'Loss: {loss.item():.4f} | Accuracy: {(100.0 * correct/total):.2f}% | '
+                    f'Complexities: {complexity_stats} | '
+                    f'Thresholds: {current_thresholds}'
+                )
         
         return {
             'loss': total_loss / len(dataloader),
