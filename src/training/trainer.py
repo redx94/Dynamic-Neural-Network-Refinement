@@ -3,9 +3,9 @@ import torch.nn as nn
 import torch.optim as optim
 from typing import Dict, Any
 from loguru import logger
-from src.models.neural_network import DynamicNeuralNetwork
-from src.models.hybrid_thresholds import HybridThresholds
-from src.models.analyzer import Analyzer
+from models.neural_network import DynamicNeuralNetwork
+from models.hybrid_thresholds import HybridThresholds
+from models.analyzer import Analyzer
 
 class Trainer:
     """

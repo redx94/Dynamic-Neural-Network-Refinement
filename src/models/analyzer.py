@@ -18,9 +18,16 @@ class Analyzer:
     def compute_variance(self, data: torch.Tensor) -> torch.Tensor:
         """
         Compute variance of input features.
+        Args:
+            data: Input tensor of shape (batch_size, feature_dim)
+        Returns:
+            Variance tensor of shape (batch_size,)
         """
-        # Compute variance along feature dimension
-        return torch.var(data, dim=1)
+        # Ensure the input is at least 2D and flatten all dimensions after the first
+        if data.dim() > 2:
+            data = data.view(data.size(0), -1)
+        # Compute variance along feature dimension with unbiased estimation
+        return torch.var(data, dim=1, unbiased=True)
         
     def compute_entropy(self, data: torch.Tensor) -> torch.Tensor:
         """
