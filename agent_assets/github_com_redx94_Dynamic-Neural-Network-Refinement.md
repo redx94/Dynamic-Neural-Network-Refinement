@@ -34,7 +34,7 @@ forks](/redx94/Dynamic-Neural-Network-Refinement/forks) [Branches](/redx94/Dynam
 
 main
 
-[Branches](/redx94/Dynamic-Neural-Network-Refinement/branches) [Tags](/redx94/Dynamic-Neural-Network-Refinement/tags)
+[**1** Branch](/redx94/Dynamic-Neural-Network-Refinement/branches) [**0** Tags](/redx94/Dynamic-Neural-Network-Refinement/tags)
 
 [Go to Branches page](/redx94/Dynamic-Neural-Network-Refinement/branches)[Go to Tags page](/redx94/Dynamic-Neural-Network-Refinement/tags)
 
@@ -492,6 +492,9 @@ No releases published
 No packages published
 
 ## [Contributors\  2](/redx94/Dynamic-Neural-Network-Refinement/graphs/contributors)
+
+- [![@redx94](https://avatars.githubusercontent.com/u/84244886?s=64&v=4)](https://github.com/redx94)[**redx94** Reco](https://github.com/redx94)
+- [![@dependabot[bot]](https://avatars.githubusercontent.com/in/29110?s=64&v=4)](https://github.com/apps/dependabot)[**dependabot\[bot\]**](https://github.com/apps/dependabot)
 
 ## Languages
 
