@@ -7,6 +7,12 @@ training:
   data_loader:
     num_workers: 4
     shuffle: true
+  annealing_start_epoch: 5
+
+thresholds:
+  variance: 0.5
+  entropy: 0.7
+  sparsity: 0.3
 
 model:
   input_dim: 784
