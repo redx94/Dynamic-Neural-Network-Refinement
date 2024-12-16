@@ -1,4 +1,6 @@
-modules = ["python-3.11"]
+modules = ["python-3.12", "nix"]
+compile = "make"
+run = "npm start"
 
 [nix]
 channel = "stable-24_05"
@@ -30,4 +32,5 @@ task = "shell.exec"
 args = "python src/train.py"
 
 [deployment]
-run = ["sh", "-c", "python src/train.py"]
+run = ["sh", "-c", "npm start"]
+build = ["sh", "-c", "make"]
