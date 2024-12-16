@@ -1,55 +1,14 @@
-# setup.py
 
 from setuptools import setup, find_packages
 
 setup(
-    name="dynamic-neural-network-refinement",
-    version="0.2.0",
+    name="dynamic-neural-network",
+    version="1.0.0",
     packages=find_packages(),
     install_requires=[
-        "torch>=1.10.0",
-        "torchvision>=0.11.1",
-        "pyyaml>=5.4.1",
-        "wandb>=0.12.0",
-        "loguru>=0.5.3",
-        "matplotlib>=3.4.3",
-        "seaborn>=0.11.2",
-        "pandas>=1.3.2",
-        "plotly>=5.3.1",
-        "ray[tune]>=1.9.1",
-        "flake8>=4.0.1",
-        "black>=22.3.0",
-        "pytest>=6.2.5",
-        "great_expectations>=0.15.15",
-        "dvc>=2.8.3",
-        "fastapi>=0.70.0",
-        "uvicorn>=0.15.0",
-        "json-log-formatter>=0.8.1",
-        "bandit>=1.7.0",
-    ],
-    entry_points={
-        'console_scripts': [
-            'train=scripts.train:main',
-            'evaluate=scripts.evaluate:main',
-            'prune=scripts.prune:main',
-            'quantize=scripts.quantize:main',
-            'generate_synthetic=scripts.generate_synthetic:main',
-            'validate_data=scripts.validate_data:main',
-            'deploy_model=scripts.deploy_model:main',
-            'export_to_onnx=scripts.export_to_onnx:main',
-            'profile_training=scripts.profile_training:main',
-            'profile_inference=scripts.profile_inference:main',
-            'benchmark=scripts.benchmark:main',
-            'visualize=scripts.visualize:main',
-        ],
-    },
-    author="Reece Dixon",
-    author_email="qtt@null.net",
-    description="A project for dynamic neural network refinement with state-of-the-art practices.",
-    license="GNU Affero General Public License v3.0",
-    url="https://github.com/redx94/Dynamic-Neural-Network-Refinement",
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: GNU Affero General Public License v3.0",
-    ],
+        'torch',
+        'torchvision',
+        'loguru',
+        'pyyaml'
+    ]
 )
