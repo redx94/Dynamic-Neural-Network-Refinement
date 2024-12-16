@@ -1,88 +1,63 @@
 
 import torch
-import torch.nn as nn
-import yaml
-from pathlib import Path
-from loguru import logger
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
+from src.adaptive_thresholds import AdaptiveThresholds
+from src.per_sample_complexity import ComplexityAnalyzer
+from src.dataset_augmentation import ConditionalGAN
+from src.neural_architecture_search import NeuralArchitectureSearch
+import logging
 
-from models.neural_network import DynamicNeuralNetwork
-from models.hybrid_thresholds import HybridThresholds
-from models.analyzer import Analyzer
-from training.trainer import Trainer
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-def load_config(config_path="config/train_config.yaml"):
-    """Load training configuration from YAML file."""
-    with open(config_path) as f:
-        return yaml.safe_load(f)
+def train_model(model, train_loader, val_loader, epochs=100):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
+    
+    thresholds = AdaptiveThresholds().to(device)
+    complexity_analyzer = ComplexityAnalyzer()
+    optimizer = torch.optim.Adam(model.parameters())
+    criterion = torch.nn.CrossEntropyLoss()
+    
+    for epoch in range(epochs):
+        model.train()
+        for batch_idx, (data, target) in enumerate(train_loader):
+            data, target = data.to(device), target.to(device)
+            
+            # Calculate complexities
+            complexities = complexity_analyzer.calculate_complexities(data)
+            
+            # Get adaptive thresholds
+            adapted_thresholds = thresholds(complexities)
+            
+            # Forward pass
+            optimizer.zero_grad()
+            output = model(data)
+            loss = criterion(output, target)
+            
+            # Backward pass
+            loss.backward()
+            optimizer.step()
+            
+            if batch_idx % 10 == 0:
+                logger.info(f'Epoch: {epoch} [{batch_idx}/{len(train_loader)}] Loss: {loss.item():.4f}')
+                
+        # Validation
+        model.eval()
+        val_loss = 0
+        correct = 0
+        with torch.no_grad():
+            for data, target in val_loader:
+                data, target = data.to(device), target.to(device)
+                output = model(data)
+                val_loss += criterion(output, target).item()
+                pred = output.argmax(dim=1, keepdim=True)
+                correct += pred.eq(target.view_as(pred)).sum().item()
+                
+        val_loss /= len(val_loader)
+        accuracy = 100. * correct / len(val_loader.dataset)
+        logger.info(f'Validation - Average loss: {val_loss:.4f}, Accuracy: {accuracy:.2f}%')
 
-def create_transform():
-    """Create data transformation pipeline."""
-    return transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,))
-    ])
-
-def get_data_loaders(config):
-    """Initialize data loaders for training and validation."""
-    transform = create_transform()
-    
-    train_dataset = datasets.MNIST(
-        'data', 
-        train=True, 
-        download=True, 
-        transform=transform
-    )
-    
-    val_dataset = datasets.MNIST(
-        'data', 
-        train=False, 
-        transform=transform
-    )
-    
-    loader_args = {
-        'batch_size': config['training']['batch_size'],
-        'num_workers': config['training']['data_loader']['num_workers']
-    }
-    
-    train_loader = DataLoader(
-        train_dataset,
-        shuffle=config['training']['data_loader']['shuffle'],
-        **loader_args
-    )
-    
-    val_loader = DataLoader(
-        val_dataset,
-        shuffle=False,
-        **loader_args
-    )
-    
-    return train_loader, val_loader
-
-def save_model(model, config):
-    """Save the trained model."""
-    model_path = Path(config['output']['final_model_path'])
-    model_path.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(model.state_dict(), model_path)
-    logger.info(f"Model saved to {model_path}")
-
-def main():
-    """Main training function."""
-    config = load_config()
-    logger.info("Configuration loaded successfully")
-    
-    train_loader, val_loader = get_data_loaders(config)
-    logger.info("Data loaders initialized")
-    
-    trainer = Trainer(config)
-    logger.info("Trainer initialized")
-    
-    logger.info("Starting training process")
-    history = trainer.train(train_loader, val_loader)
-    
-    save_model(trainer.model, config)
-    return history
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    # Your dataset loading code here
+    train_model(model, train_loader, val_loader)
