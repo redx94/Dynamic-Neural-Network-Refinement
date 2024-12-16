@@ -17,6 +17,7 @@ class AdvancedNeuralNetwork(nn.Module):
         self.meta_optimizer = MetaArchitectureOptimizer(input_dim)
         self.quantum_router = QuantumInspiredRouter()
         self.evolving_loss = EvolvingLoss(input_dim + output_dim)
+        self.quantum_biological = QuantumBiologicalNetwork(input_dim)
         self.neuromorphic_core = NeuromorphicCore()
         self.federated_learner = FederatedLearner()
         self.consciousness_system = MetaConsciousnessSystem(input_dim)
