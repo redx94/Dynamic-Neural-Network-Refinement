@@ -47,3 +47,26 @@ def predict(request: InferenceRequest):
         return {"predictions": predictions}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+import streamlit as st
+from dashboard import Dashboard
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+dashboard = Dashboard()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+async def root():
+    return {"message": "Dynamic Neural Network Refinement API"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
