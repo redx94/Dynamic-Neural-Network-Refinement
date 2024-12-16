@@ -4,6 +4,7 @@ training:
   epochs: 100
   learning_rate: 0.001
   optimizer: adam
+  log_interval: 10
   data_loader:
     num_workers: 4
     shuffle: true
