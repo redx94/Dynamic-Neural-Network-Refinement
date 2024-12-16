@@ -131,6 +131,7 @@ class Trainer:
     
     def train(self, train_loader: torch.utils.data.DataLoader, 
              val_loader: torch.utils.data.DataLoader) -> Dict[str, list]:
+        from src.utils.metrics import MetricsCollector
         """
         Complete training process.
         """

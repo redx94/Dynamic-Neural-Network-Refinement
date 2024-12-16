@@ -1,13 +1,27 @@
-# prometheus/alert.rules.yml
 
 groups:
-  - name: app_alerts
+  - name: model_monitoring
     rules:
-      - alert: HighRequestLatency
-        expr: histogram_quantile(0.95, sum(rate(app_request_latency_seconds_bucket[5m])) by (le)) > 1
-        for: 2m
+      - alert: HighInferenceLatency
+        expr: avg_over_time(inference_latency_seconds[5m]) > 0.1
+        for: 5m
         labels:
-          severity: "critical"
+          severity: warning
         annotations:
-          summary: "High request latency detected"
-          description: "The 95th percentile latency is above 1 second for more than 2 minutes."
+          summary: High inference latency detected
+
+      - alert: LowAccuracy
+        expr: model_accuracy < 0.85
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: Model accuracy below threshold
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 1e9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage detected
