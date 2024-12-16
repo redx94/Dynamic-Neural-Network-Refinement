@@ -13,8 +13,21 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def train_model(model, train_loader, val_loader, epochs=100):
+    import streamlit as st
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
+    
+    # Initialize metrics in session state if not present
+    if 'metrics' not in st.session_state:
+        st.session_state.metrics = {
+            'training_loss': [],
+            'validation_loss': [],
+            'accuracy': [],
+            'memory_usage': [],
+            'learning_rates': [],
+            'layer_activations': [],
+            'gradient_norms': []
+        }
     
     thresholds = AdaptiveThresholds().to(device)
     complexity_analyzer = ComplexityAnalyzer()
@@ -43,6 +56,8 @@ def train_model(model, train_loader, val_loader, epochs=100):
             
             if batch_idx % 10 == 0:
                 logger.info(f'Epoch: {epoch} [{batch_idx}/{len(train_loader)}] Loss: {loss.item():.4f}')
+                st.session_state.metrics['training_loss'].append(loss.item())
+                st.session_state.metrics['memory_usage'].append(torch.cuda.memory_allocated() / 1e6 if torch.cuda.is_available() else 0)
                 
         # Validation
         model.eval()
@@ -59,6 +74,8 @@ def train_model(model, train_loader, val_loader, epochs=100):
         val_loss /= len(val_loader)
         accuracy = 100. * correct / len(val_loader.dataset)
         logger.info(f'Validation - Average loss: {val_loss:.4f}, Accuracy: {accuracy:.2f}%')
+        st.session_state.metrics['validation_loss'].append(val_loss)
+        st.session_state.metrics['accuracy'].append(accuracy / 100.0)
 
 if __name__ == '__main__':
     # Initialize model
