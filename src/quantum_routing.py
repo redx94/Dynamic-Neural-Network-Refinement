@@ -5,13 +5,21 @@ import numpy as np
 from typing import Dict, List
 
 class QuantumInspiredRouter(nn.Module):
-    def __init__(self, num_qubits: int = 4):
+    def __init__(self, num_qubits: int = 16):
         super().__init__()
         self.num_qubits = num_qubits
         self.quantum_layers = nn.ModuleList([
             nn.Linear(2**num_qubits, 2**num_qubits) 
-            for _ in range(3)
+            for _ in range(5)
         ])
+        self.tensor_networks = nn.ModuleList([
+            nn.Sequential(
+                nn.Linear(2**num_qubits, 512),
+                nn.GELU(),
+                nn.Linear(512, 2**num_qubits)
+            ) for _ in range(3)
+        ])
+        self.entanglement_layers = nn.Parameter(torch.randn(3, num_qubits, num_qubits))
         
     def hadamard_transform(self, x: torch.Tensor) -> torch.Tensor:
         h = torch.tensor([[1., 1.], [1., -1.]]) / np.sqrt(2)
