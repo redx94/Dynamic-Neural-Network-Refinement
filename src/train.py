@@ -1,5 +1,6 @@
 
 import torch
+import torchvision
 from torch.utils.data import DataLoader
 from src.adaptive_thresholds import AdaptiveThresholds
 from src.per_sample_complexity import ComplexityAnalyzer
@@ -59,5 +60,17 @@ def train_model(model, train_loader, val_loader, epochs=100):
         logger.info(f'Validation - Average loss: {val_loss:.4f}, Accuracy: {accuracy:.2f}%')
 
 if __name__ == '__main__':
-    # Your dataset loading code here
+    # Initialize model
+    model = DynamicNeuralNetwork(input_dim=784, hidden_dims=[256, 128], output_dim=10)
+    
+    # Initialize data loaders (assuming MNIST data)
+    train_dataset = torchvision.datasets.MNIST(root='./data', train=True, download=True,
+                                             transform=torchvision.transforms.ToTensor())
+    val_dataset = torchvision.datasets.MNIST(root='./data', train=False,
+                                           transform=torchvision.transforms.ToTensor())
+    
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+    
+    # Train the model
     train_model(model, train_loader, val_loader)
