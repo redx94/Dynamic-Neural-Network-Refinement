@@ -4,6 +4,7 @@ import torchvision
 from torch.utils.data import DataLoader
 from src.adaptive_thresholds import AdaptiveThresholds
 from src.per_sample_complexity import ComplexityAnalyzer
+from src.models.dynamic_nn import DynamicNeuralNetwork
 from src.dataset_augmentation import ConditionalGAN
 from src.neural_architecture_search import NeuralArchitectureSearch
 import logging
