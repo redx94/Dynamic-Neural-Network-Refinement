@@ -4,17 +4,24 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-def gradient_sensitivity_analysis(model, data, criterion):
+def gradient_sensitivity_analysis(model, data, criterion, complexities):
     gradients = []
     model.zero_grad()
     output = model(data)
     loss = criterion(output)
-    loss.backward()
+    complexity_loss = sum(complexities.values()).mean()
+    total_loss = loss + 0.1 * complexity_loss
+    total_loss.backward()
     
-    for param in model.parameters():
+    for name, param in model.named_parameters():
         if param.grad is not None:
-            gradients.append(param.grad.abs().mean().item())
-    return torch.tensor(gradients).mean()
+            grad_info = {
+                'name': name,
+                'mean_grad': param.grad.abs().mean().item(),
+                'std_grad': param.grad.std().item()
+            }
+            gradients.append(grad_info)
+    return gradients
 
 class LearnableThresholds(nn.Module):
     def __init__(self, initial_values):

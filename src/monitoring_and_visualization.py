@@ -1,66 +1,91 @@
 
 import torch
-import torch.nn.functional as F
-from captum.attr import IntegratedGradients
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import numpy as np
+from datetime import datetime
 
-class MonitoringAndVisualization:
-    def __init__(self, model, device):
-        self.model = model
-        self.device = device
-        self.ig = IntegratedGradients(self.model)
-        self.metrics_history = {'loss': [], 'accuracy': [], 'complexity': []}
+class MonitoringSystem:
+    def __init__(self):
+        self.metrics = {
+            'training_loss': [],
+            'validation_loss': [],
+            'accuracy': [],
+            'complexity_metrics': [],
+            'gradient_metrics': [],
+            'threshold_values': []
+        }
         
-    def compute_feature_attributions(self, data, complexities):
-        attributions = {}
-        for i in range(data.size(0)):
-            input = data[i].unsqueeze(0).requires_grad_(True).to(self.device)
-            complexity = complexities[i].unsqueeze(0).to(self.device)
-            attribution, _ = self.ig.attribute(input, target=0, return_convergence_delta=True)
-            attributions[i] = attribution.cpu().detach().numpy()
-        return attributions
-        
-    def track_metrics(self, loss, accuracy, complexity):
-        self.metrics_history['loss'].append(loss)
-        self.metrics_history['accuracy'].append(accuracy)
-        self.metrics_history['complexity'].append(complexity)
-        
+    def update_metrics(self, metrics_dict):
+        for key, value in metrics_dict.items():
+            if key in self.metrics:
+                self.metrics[key].append(value)
+                
     def create_dashboard(self):
         fig = make_subplots(
-            rows=2, cols=2,
-            subplot_titles=('Loss Over Time', 'Accuracy Over Time', 
-                          'Complexity Distribution', 'Feature Importance')
+            rows=3, cols=2,
+            subplot_titles=(
+                'Training Loss', 'Validation Loss',
+                'Accuracy', 'Complexity Metrics',
+                'Gradient Flow', 'Threshold Values'
+            )
         )
         
-        # Loss plot
+        # Training Loss
         fig.add_trace(
-            go.Scatter(y=self.metrics_history['loss'], name='Loss'),
+            go.Scatter(y=self.metrics['training_loss'], name='Training Loss'),
             row=1, col=1
         )
         
-        # Accuracy plot
+        # Validation Loss
         fig.add_trace(
-            go.Scatter(y=self.metrics_history['accuracy'], name='Accuracy'),
+            go.Scatter(y=self.metrics['validation_loss'], name='Validation Loss'),
             row=1, col=2
         )
         
-        # Complexity distribution
+        # Accuracy
         fig.add_trace(
-            go.Histogram(x=self.metrics_history['complexity'], name='Complexity'),
+            go.Scatter(y=self.metrics['accuracy'], name='Accuracy'),
             row=2, col=1
         )
         
-        # Feature importance plot
-        if hasattr(self, 'last_attribution'):
+        # Complexity Metrics
+        if self.metrics['complexity_metrics']:
+            complexities = np.array(self.metrics['complexity_metrics'])
             fig.add_trace(
-                go.Bar(y=self.last_attribution.mean(axis=0), name='Feature Importance'),
+                go.Scatter(y=complexities.mean(axis=1), name='Avg Complexity'),
                 row=2, col=2
             )
-            
-        fig.update_layout(height=800, title_text="Model Monitoring Dashboard")
-        return fig
         
-    def save_dashboard(self, filename='dashboard.html'):
+        # Gradient Flow
+        if self.metrics['gradient_metrics']:
+            gradients = np.array(self.metrics['gradient_metrics'])
+            fig.add_trace(
+                go.Heatmap(z=gradients, name='Gradient Flow'),
+                row=3, col=1
+            )
+        
+        # Threshold Values
+        if self.metrics['threshold_values']:
+            thresholds = np.array(self.metrics['threshold_values'])
+            fig.add_trace(
+                go.Scatter(y=thresholds, name='Threshold Values'),
+                row=3, col=2
+            )
+        
+        fig.update_layout(height=1200, width=1000, title_text="Model Monitoring Dashboard")
+        return fig
+    
+    def save_dashboard(self, filename=None):
+        if filename is None:
+            filename = f'dashboard_{datetime.now().strftime("%Y%m%d_%H%M%S")}.html'
         fig = self.create_dashboard()
         fig.write_html(filename)
+        return filename
+
+    def log_metrics(self, step, **kwargs):
+        for key, value in kwargs.items():
+            if isinstance(value, torch.Tensor):
+                value = value.detach().cpu().numpy()
+            if key in self.metrics:
+                self.metrics[key].append(value)
