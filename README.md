@@ -29,6 +29,13 @@ A revolutionary neural network framework that combines quantum computing princip
 - Automated architecture optimization
 - Performance-based scaling
 
+## Interactive Demos
+
+Click on any of these demos to see the components in action:
+
+- [Quantum Network Demo](demos/quantum_network_demo.ipynb) - See how the quantum-biological network processes patterns
+- [Consciousness Engine Demo](demos/consciousness_demo.ipynb) - Explore the meta-consciousness processing
+
 ## Quick Start Guide
 
 ### Installation
