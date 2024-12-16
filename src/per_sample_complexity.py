@@ -12,7 +12,7 @@ class ComplexityAnalyzer:
         complexities = {}
         
         # Variance complexity
-        complexities['variance'] = torch.var(x, dim=1).mean()
+        complexities['variance'] = torch.var(x, dim=1, unbiased=False).mean()
         
         # Entropy complexity
         softmax = torch.nn.functional.softmax(x, dim=1)
