@@ -1,27 +1,19 @@
 
-import logging
+from loguru import logger
 import sys
-from logging.handlers import RotatingFileHandler
 
-def setup_logger(name: str, log_file: str = 'app.log'):
-    formatter = logging.Formatter(
-        '%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s'
-    )
+def setup_logging(log_file=None):
+    """Configure logging settings."""
+    logger.remove()  # Remove default handler
     
-    # File handler
-    file_handler = RotatingFileHandler(
-        log_file, maxBytes=10*1024*1024, backupCount=5
-    )
-    file_handler.setFormatter(formatter)
+    # Console logging
+    logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
     
-    # Console handler
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(formatter)
-    
-    # Logger setup
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
+    # File logging if specified
+    if log_file:
+        logger.add(log_file, 
+                  format="{time} {level} {message}",
+                  rotation="500 MB",
+                  level="DEBUG")
     
     return logger

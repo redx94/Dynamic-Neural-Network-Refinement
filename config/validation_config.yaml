@@ -1,0 +1,14 @@
+
+validation:
+  batch_size: 32
+  num_workers: 4
+  
+dataset:
+  min_samples_per_class: 100
+  expected_classes: 10
+  image_dimensions: [28, 28]
+  
+thresholds:
+  outlier_std_dev: 3.0
+  min_pixel_value: 0
+  max_pixel_value: 255
