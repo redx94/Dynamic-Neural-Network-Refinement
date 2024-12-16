@@ -1,0 +1,11 @@
+
+batch_sizes: [1, 8, 16, 32, 64, 128]
+input_sizes: [224, 384, 512]
+iterations: 100
+warmup_iterations: 10
+metrics:
+  - latency
+  - throughput
+  - memory_usage
+device: cuda
+output_path: logs/benchmark_results.json
