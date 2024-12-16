@@ -234,4 +234,13 @@ class Dashboard:
 
 if __name__ == "__main__":
     dashboard = Dashboard()
+    st.session_state.metrics = {
+        'training_loss': [0.0],
+        'validation_loss': [0.0],
+        'accuracy': [0.0],
+        'memory_usage': [0.0],
+        'learning_rates': [0.0],
+        'layer_activations': [],
+        'gradient_norms': []
+    }
     dashboard.render()

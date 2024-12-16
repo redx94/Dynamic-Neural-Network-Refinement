@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 def train_model(model, train_loader, val_loader, epochs=100):
     import streamlit as st
+    if not st.runtime.exists():
+        st.runtime.get_instance()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
     
