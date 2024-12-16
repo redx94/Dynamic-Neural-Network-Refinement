@@ -160,3 +160,22 @@ Navigate to `http://localhost:8000/docs` in your web browser to access the Swagg
 ---
 
 _For more detailed examples and advanced usage, refer to the [Tutorials](https://chatgpt.com/c/tutorials/example_tutorial.md) section._
+# API Documentation
+
+## Model API
+
+### DynamicNN
+- `__init__(input_size, hidden_sizes, output_size)`
+- `forward(x)`
+- `adjust_architecture(complexity_score)`
+
+### HybridThresholds
+- `calculate_threshold(input_data)`
+- `update_threshold(new_score)`
+
+## Training API
+
+### Trainer
+- `train(model, dataloader, epochs)`
+- `evaluate(model, dataloader)`
+- `save_checkpoint(model, path)`
