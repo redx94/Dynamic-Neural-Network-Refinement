@@ -13,3 +13,4 @@ pre-commit>=2.15.0
 wandb>=0.12.0
 tensorboard>=2.6.0
 loguru>=0.7.0
+scikit-learn>=1.0.2

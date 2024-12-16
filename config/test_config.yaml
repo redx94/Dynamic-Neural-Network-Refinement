@@ -1,0 +1,12 @@
+
+test:
+  batch_size: 128
+  num_workers: 4
+  shuffle: false
+
+model:
+  checkpoint_path: models/final/model_v1.0_final.pth
+
+metrics:
+  save_path: results/test_metrics.json
+  confusion_matrix_path: results/confusion_matrix.png
