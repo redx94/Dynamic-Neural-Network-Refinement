@@ -1,9 +1,13 @@
-# config/distributed_config.yaml
 
-distributed:
+world_size: 4
+backend: "nccl"
+init_method: "tcp://localhost:23456"
+rank: 0
+distributed_training:
   enabled: true
-  backend: nccl
-  init_method: env://
-  world_size: 1
-  rank: 0
-  local_rank: 0
+  num_nodes: 2
+  gpus_per_node: 2
+  master_addr: "localhost"
+  master_port: 29500
+  backend: "nccl"
+  init_method: "env://"

@@ -1,14 +1,23 @@
 
-import pytest
-from src.adaptive_thresholds import HybridThresholds
+import unittest
+import torch
+from src.adaptive_thresholds import AdaptiveThresholds
 
-@pytest.fixture
-def sample_data():
-    return torch.randn(10, 5), torch.randint(0, 3, (10,))
+class TestAdaptiveThresholds(unittest.TestCase):
+    def setUp(self):
+        self.thresholds = AdaptiveThresholds()
+        
+    def test_threshold_update(self):
+        initial_threshold = self.thresholds.get_current_threshold()
+        self.thresholds.update(0.8)
+        new_threshold = self.thresholds.get_current_threshold()
+        self.assertNotEqual(initial_threshold, new_threshold)
+        
+    def test_threshold_bounds(self):
+        self.thresholds.update(1.5)
+        self.assertLessEqual(self.thresholds.get_current_threshold(), 1.0)
+        self.thresholds.update(-0.5)
+        self.assertGreaterEqual(self.thresholds.get_current_threshold(), 0.0)
 
-def test_threshold_forward(sample_data):
-    data, labels = sample_data
-    model = HybridThresholds({'variance': 0.5, 'entropy': 0.5, 'sparsity': 0.5}, 10, 100)
-    output = model(data, labels, data, 1)
-    assert output is not None
-    
+if __name__ == '__main__':
+    unittest.main()

@@ -1,8 +1,15 @@
-# config/eval_config.yaml
 
-evaluation:
-  batch_size: 64
-  data_path: data/processed/your_dataset_processed.csv
-  model_path: models/final/model_v1.0_final.pth
-  output:
-    evaluation_results_path: logs/evaluation_results.csv
+model:
+  checkpoint_path: "models/final/model_v1.0_final.pth"
+  batch_size: 32
+
+metrics:
+  accuracy: true
+  precision: true
+  recall: true
+  f1_score: true
+
+visualization:
+  confusion_matrix: true
+  roc_curve: true
+  precision_recall_curve: true
