@@ -9,6 +9,8 @@ class DynamicNeuralNetwork(nn.Module):
         self.layer3 = nn.Linear(hidden_dims[1], output_dim)
 
     def forward(self, x):
+        batch_size = x.size(0)
+        x = x.view(batch_size, -1)  # Flatten the input
         x = nn.ReLU()(self.layer1(x))
         x = nn.ReLU()(self.layer2(x))
         x = self.layer3(x)
