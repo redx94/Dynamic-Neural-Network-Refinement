@@ -8,7 +8,7 @@ from .evolving_loss import EvolvingLoss
 # Added imports for new components
 from .neuromorphic_core import NeuromorphicCore
 from .federated_learning import FederatedLearner
-from .consciousness_engine import ConsciousnessEngine # Added ConsciousnessEngine import
+from .meta_consciousness import MetaConsciousnessSystem # Added ConsciousnessEngine import
 from .recursive_improvement import RecursiveImprovement # Added RecursiveImprovement import
 
 class AdvancedNeuralNetwork(nn.Module):
@@ -19,7 +19,7 @@ class AdvancedNeuralNetwork(nn.Module):
         self.evolving_loss = EvolvingLoss(input_dim + output_dim)
         self.neuromorphic_core = NeuromorphicCore()
         self.federated_learner = FederatedLearner()
-        self.consciousness_engine = ConsciousnessEngine(input_dim)
+        self.consciousness_system = MetaConsciousnessSystem(input_dim)
         self.recursive_improver = RecursiveImprovement(self)
 
         self.current_architecture = self.meta_optimizer.optimize_architecture({
