@@ -128,5 +128,14 @@ class Dashboard:
                 st.session_state.metrics[key].append(value)
 
 if __name__ == "__main__":
+    import streamlit.web.bootstrap
     dashboard = Dashboard()
-    dashboard.render()
+    streamlit.web.bootstrap.run(
+        __file__,
+        '',
+        flag_options={
+            'server.address': '0.0.0.0',
+            'server.port': 8080,
+            'server.headless': True
+        }
+    )
