@@ -19,7 +19,7 @@ streamlit = "^1.28.0"
 plotly = "^5.18.0"
 pyyaml = "^6.0.1"
 prometheus-client = "^0.21.1"
-watchdog = "^3.0.0"
+watchdog = "^6.0.0"
 setuptools = "^75.6.0"
 
 [tool.poetry.group.dev.dependencies]
