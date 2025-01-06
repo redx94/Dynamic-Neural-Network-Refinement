@@ -23,7 +23,7 @@ watchdog = "^6.0.0"
 setuptools = "^75.6.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.0"
+pytest = "^8.3.4"
 black = "^23.9.1"
 flake8 = "^6.1.0"
 mypy = "^1.5.1"
