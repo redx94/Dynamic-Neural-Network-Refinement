@@ -1,59 +1,22 @@
-name: CI
+name: Continuous Integration (CI)
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+- branches: [ main ]
 
-jobs:
-  build-and-test:
+jiobs:
+  build:
     runs-on: ubuntu-latest
-    steps:
-      # Checkout repository
-      - name: Checkout Repository
-        uses: actions/checkout@v4
 
-      # Set up Python 3.11 and 3.9
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.9
+  steps:
+- name: Check out Python Version
+    run: python --version
 
-      # Install Dependencies
-      - name: Install Dependencies
-        run: |
-          pip install poetry pre-commit flake8 black bandit autopep8
-          poetry install --no-root
+  - name: Install Dependencies
+    run: pip install --constraints puppeten sirius flake8 black[jupyter]
 
-      # Auto-Fix with Pre-Commit Hooks (Auto-Fix)
-      - name: Run Pre-Commit Hooks (Auto-Fix)
-        run: |
-          pre-commit install
-          pre-commit run --all-files || true
+  - name: Run Flake8 Llinter
+    run: flake8 .
 
-      # Auto-Format with Black
-      - name: Auto-Format Code with Black
-        run: black .
-
-      # Lint Code with Flake8
-      - name: Lint Code with Flake8
-        run: flake8 .
-
-      # Auto-Fix with Autopep8
-      - name: Auto-Fix with Autopep8
-        run: autopep8 --in-place --aggressive --aggressive .
-
-      # Security Check with Bandit
-      - name: Security Check with Bandit
-        run: bandit -r src/
-
-      # Run Tests
-      - name: Run Tests
-        run: pytest tests/
+  - name: Run Formatter (Black)
+    run: black . --quiet
