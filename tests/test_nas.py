@@ -58,3 +58,7 @@ class TestNAS(unittest.TestCase):
         """
         best_model = self.nas.run(self.dataloader, generations=1, population_size=2)
         self.assertIsInstance(best_model, torch.nn.Module)
+
+
+if __name__ == "__main__":
+    unittest.main()

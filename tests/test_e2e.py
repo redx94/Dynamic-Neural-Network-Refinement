@@ -31,7 +31,10 @@ class TestE2E(unittest.TestCase):
             ],
             capture_output=True
         )
-        self.assertEqual(train_result.returncode, 0, f"Training failed: {train_result.stderr.decode()}")
+        self.assertEqual(
+            train_result.returncode, 0,
+            f"Training failed: {train_result.stderr.decode()}"
+        )
 
         # Step 2: Evaluate the model
         with open("config/train_config.yaml") as config_file:
@@ -45,7 +48,10 @@ class TestE2E(unittest.TestCase):
             ],
             capture_output=True
         )
-        self.assertEqual(eval_result.returncode, 0, f"Evaluation failed: {eval_result.stderr.decode()}")
+        self.assertEqual(
+            eval_result.returncode, 0,
+            f"Evaluation failed: {eval_result.stderr.decode()}"
+        )
 
         # Step 3: Apply Pruning
         pruned_model_path = "models/pruned/pruned_model.pth"
@@ -56,7 +62,10 @@ class TestE2E(unittest.TestCase):
             ],
             capture_output=True
         )
-        self.assertEqual(prune_result.returncode, 0, f"Pruning failed: {prune_result.stderr.decode()}")
+        self.assertEqual(
+            prune_result.returncode, 0,
+            f"Pruning failed: {prune_result.stderr.decode()}"
+        )
         self.assertTrue(os.path.exists(pruned_model_path), "Pruned model not found.")
 
         # Step 4: Apply Quantization
@@ -68,8 +77,14 @@ class TestE2E(unittest.TestCase):
             ],
             capture_output=True
         )
-        self.assertEqual(quantize_result.returncode, 0, f"Quantization failed: {quantize_result.stderr.decode()}")
-        self.assertTrue(os.path.exists(quantized_model_path), "Quantized model not found.")
+        self.assertEqual(
+            quantize_result.returncode, 0,
+            f"Quantization failed: {quantize_result.stderr.decode()}"
+        )
+        self.assertTrue(
+            os.path.exists(quantized_model_path),
+            "Quantized model not found."
+        )
 
         # Step 5: Generate Synthetic Data
         synthetic_data_path = "data/synthetic/synthetic_sample.pth"
@@ -80,8 +95,14 @@ class TestE2E(unittest.TestCase):
             ],
             capture_output=True
         )
-        self.assertEqual(generate_result.returncode, 0, f"Synthetic data generation failed: {generate_result.stderr.decode()}")
-        self.assertTrue(os.path.exists(synthetic_data_path), "Synthetic sample data not found.")
+        self.assertEqual(
+            generate_result.returncode, 0,
+            f"Synthetic data generation failed: {generate_result.stderr.decode()}"
+        )
+        self.assertTrue(
+            os.path.exists(synthetic_data_path),
+            "Synthetic sample data not found."
+        )
 
         # Step 6: Run Visualization
         visualize_result = subprocess.run(
@@ -91,11 +112,17 @@ class TestE2E(unittest.TestCase):
             ],
             capture_output=True
         )
-        self.assertEqual(visualize_result.returncode, 0, f"Visualization failed: {visualize_result.stderr.decode()}")
+        self.assertEqual(
+            visualize_result.returncode, 0,
+            f"Visualization failed: {visualize_result.stderr.decode()}"
+        )
 
         # Check if visualization files are created
         training_plot = "visualizations/training_plots/training_loss_epoch_20.png"
-        self.assertTrue(os.path.exists(training_plot), "Training visualization plot not found.")
+        self.assertTrue(
+            os.path.exists(training_plot),
+            "Training visualization plot not found."
+        )
 
 
 if __name__ == "__main__":
