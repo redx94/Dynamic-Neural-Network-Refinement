@@ -26,4 +26,4 @@ class TestNAS(unittest.TestCase):
         inputs = torch.randn(100, 100)
         labels = torch.randint(0, 10, (100,))
         dataset = TensorDataset(inputs, labels)
-        self.dataloader = DataLoader(datase
+        self.dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
