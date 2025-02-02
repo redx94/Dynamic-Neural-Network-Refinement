@@ -1,6 +1,3 @@
-import torch
-
-
 class HybridThresholds:
     """
     Handles dynamic threshold adjustments based on an annealing schedule.
@@ -45,9 +42,9 @@ class HybridThresholds:
         Updates thresholds based on the current epoch and applies them to complexities.
 
         Args:
-            variance (torch.Tensor): Variance tensor.
-            entropy (torch.Tensor): Entropy tensor.
-            sparsity (torch.Tensor): Sparsity tensor.
+            variance (float): Variance metric.
+            entropy (float): Entropy metric.
+            sparsity (float): Sparsity metric.
             current_epoch (int): Current training epoch.
 
         Returns:

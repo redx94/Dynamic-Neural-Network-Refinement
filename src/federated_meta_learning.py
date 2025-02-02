@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-from typing import List, Dict
 import copy
+from typing import List, Dict
 
 
 class FederatedMetaLearner(nn.Module):
@@ -10,6 +10,13 @@ class FederatedMetaLearner(nn.Module):
     """
 
     def __init__(self, base_model: nn.Module, num_clients: int = 100):
+        """
+        Initializes the FederatedMetaLearner.
+
+        Args:
+            base_model (nn.Module): The base neural network model.
+            num_clients (int): Number of clients participating in training.
+        """
         super().__init__()
         self.base_model = base_model
         self.num_clients = num_clients
@@ -41,4 +48,5 @@ class FederatedMetaLearner(nn.Module):
             aggregated_grad = torch.stack([
                 self.add_noise(update[name].grad) for update in client_updates
             ]).mean(0)
+
             param.data -= 0.01 * aggregated_grad  # Learning rate of 0.01
