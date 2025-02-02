@@ -1,6 +1,5 @@
 import argparse
 import torch
-import yaml
 from src.model import DynamicNeuralNetwork
 from src.hybrid_thresholds import HybridThresholds
 

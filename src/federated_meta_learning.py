@@ -47,6 +47,6 @@ class FederatedMetaLearner(nn.Module):
         for name, param in self.base_model.named_parameters():
             aggregated_grad = torch.stack([
                 self.add_noise(update[name].grad) for update in client_updates
-            ]).mean(0)
+            ]).mean(dim=0)
 
             param.data -= 0.01 * aggregated_grad  # Learning rate of 0.01

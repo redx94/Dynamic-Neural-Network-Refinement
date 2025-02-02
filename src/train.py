@@ -42,7 +42,8 @@ def train_model(model, train_loader, val_loader, epochs=100):
 
             if batch_idx % 10 == 0:
                 logger.info(
-                    f"Epoch {epoch + 1}/{epochs}, Batch {batch_idx}: Loss = {loss.item():.4f}"
+                    f"Epoch {epoch + 1}/{epochs}, Batch {batch_idx}: "
+                    f"Loss = {loss.item():.4f}"
                 )
 
         avg_loss = running_loss / len(train_loader)

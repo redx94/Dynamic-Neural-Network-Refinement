@@ -33,9 +33,7 @@ class HybridThresholds:
             self.total_epochs - self.annealing_start_epoch
         )
 
-        return {
-            k: v * (1 - progress) for k, v in self.initial_thresholds.items()
-        }
+        return {k: v * (1 - progress) for k, v in self.initial_thresholds.items()}
 
     def __call__(self, variance, entropy, sparsity, current_epoch):
         """
