@@ -10,6 +10,12 @@ class MetaConsciousnessSystem(nn.Module):
     """
 
     def __init__(self, input_dim: int):
+        """
+        Initializes the MetaConsciousnessSystem.
+
+        Args:
+            input_dim (int): Input feature dimension.
+        """
         super().__init__()
         self.attention = nn.MultiheadAttention(input_dim, num_heads=8)
         self.consciousness_gate = nn.Sequential(
@@ -35,8 +41,6 @@ class MetaConsciousnessSystem(nn.Module):
         Returns:
             Dict[str, torch.Tensor]: Processed consciousness states.
         """
-        batch_size = x.size(0)
-
         # Self-attention for global context
         attn_out, _ = self.attention(x, x, x)
 
@@ -46,7 +50,6 @@ class MetaConsciousnessSystem(nn.Module):
 
         # Meta-memory update
         h_t, c_t = self.meta_memory(gated_features.mean(1))
-        h_t, c_t = self.meta_memory(gated_features.mean(1), (h_t, c_t))
 
         # Awareness prediction
         combined = torch.cat([h_t, gated_features.mean(1)], dim=-1)

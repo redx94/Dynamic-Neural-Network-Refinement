@@ -1,6 +1,5 @@
 import argparse
 import great_expectations as ge
-from great_expectations.data_context import DataContext
 
 
 def parse_args():
@@ -21,9 +20,6 @@ def main():
     Main function to validate dataset using Great Expectations.
     """
     args = parse_args()
-
-    # Load DataContext
-    data_context = DataContext()
 
     # Load dataset
     df = ge.read_csv(args.data_path)

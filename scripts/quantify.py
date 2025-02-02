@@ -19,28 +19,11 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_config(config_path):
-    """
-    Loads configuration from a YAML file.
-
-    Args:
-        config_path (str): Path to configuration file.
-
-    Returns:
-        dict: Parsed configuration dictionary.
-    """
-    with open(config_path, "r") as file:
-        return yaml.safe_load(file)
-
-
 def main():
     """
     Main function to perform model quantization.
     """
     args = parse_args()
-
-    # Load configuration
-    config = load_config(args.config)
 
     # Load model
     device = "cuda" if torch.cuda.is_available() else "cpu"

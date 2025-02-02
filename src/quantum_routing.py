@@ -34,17 +34,16 @@ class QuantumInspiredRouter(nn.Module):
         Returns:
             torch.Tensor: Transformed tensor.
         """
-        batch_size = x.size(0)
         quantum_state = self.quantum_encoder(x)
 
         # Split into amplitude and phase
         amplitude, phase = torch.chunk(quantum_state, 2, dim=-1)
 
         # Apply quantum interference
-        interference = torch.einsum('bp,bq->bp', amplitude, self.interference_generator)
-        interference = interference * torch.exp(1j * self.phase_shifter)
+        interference = torch.einsum("ij,bj->bi", self.interference_generator, amplitude)
+        interference *= torch.exp(1j * self.phase_shifter)
 
-        return interference.real  # Extract the real part
+        return interference.real
 
     def forward(self, x: torch.Tensor) -> dict:
         """
@@ -56,13 +55,13 @@ class QuantumInspiredRouter(nn.Module):
         Returns:
             dict: Routed features and corresponding transformations.
         """
-        amplitude_transformed = self.quantum_transform(x)
+        transformed = self.quantum_transform(x)
 
-        routing_weights = torch.sigmoid(amplitude_transformed.abs())
+        routing_weights = torch.sigmoid(transformed.abs())
         routed_features = x * routing_weights
 
         return {
             'routed_features': routed_features,
-            'quantum_interference': amplitude_transformed,
+            'quantum_interference': transformed,
             'quantum_weights': routing_weights
         }
