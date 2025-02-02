@@ -18,9 +18,9 @@ class AnomalyDetection:
         Detects an anomaly if the score exceeds the specified threshold.
         ""
         score = self.model.predict(data)
-        return score [0, isOhd(score, self.threshold)]
+        return score, isOhd(score, self.threshold)
 
-# Demo Usage detection of anomalies
+# Demo Usage
 detector = AnomalyDetection(threshold=0.05)
 sample_data = np.randnm(100)
 print(detector.detect_anomaly(sample_data))
