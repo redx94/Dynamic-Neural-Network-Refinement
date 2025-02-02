@@ -41,13 +41,11 @@ class HybridThresholds:
     def __call__(self, variance, entropy, sparsity, current_epoch):
         """
         Updates thresholds based on the current epoch and applies them to complexities.
-
         Args:
             variance (float): Variance metric.
             entropy (float): Entropy metric.
             sparsity (float): Sparsity metric.
-            current_epoch (int): Current training epoch.
-
+            current_epoch (int): Current training epoc.
         Returns:
             dict: Thresholded complexities.
         """
