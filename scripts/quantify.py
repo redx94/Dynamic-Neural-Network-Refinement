@@ -3,46 +3,60 @@ import torch
 import yaml
 from src.model import DynamicNeuralNetwork
 from src.hybrid_thresholds import HybridThresholds
-from scripts.utils import load_model, save_model, setup_logging
 
 
 def parse_args():
+    """
+    Parses command-line arguments for quantizing the model.
+
+    Returns:
+        argparse.Namespace: Parsed command-line arguments.
+    """
     parser = argparse.ArgumentParser(description="Quantize Dynamic Neural Network")
-    parser.add_argument('--config', type=str, help='Path to training config file', required=True)
-    parser.add_argument('--model_path', type=str, help='Path to the trained model', required=True)
-    parser.add_argument('--quantized_model_path', type=str, help='Path to save the quantized model', required=True)
+    parser.add_argument("--config", type=str, help="Path to training config file", required=True)
+    parser.add_argument("--model_path", type=str, help="Path to the trained model", required=True)
+    parser.add_argument("--quantized_model_path", type=str, help="Path to save the quantized model", required=True)
     return parser.parse_args()
 
 
 def load_config(config_path):
-    with open(config_path, 'r') as file:
+    """
+    Loads configuration from a YAML file.
+
+    Args:
+        config_path (str): Path to configuration file.
+
+    Returns:
+        dict: Parsed configuration dictionary.
+    """
+    with open(config_path, "r") as file:
         return yaml.safe_load(file)
 
 
 def main():
+    """
+    Main function to perform model quantization.
+    """
     args = parse_args()
 
     # Load configuration
     config = load_config(args.config)
 
     # Load model
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    hybrid_thresholds = HybridThresholds(
-        initial_thresholds=config['thresholds'],
-        annealing_start_epoch=config['thresholds']['annealing_start_epoch'],
-        total_epochs=config['thresholds']['total_epochs']
-    )
-    model = DynamicNeuralNetwork(hybrid_thresholds=hybrid_thresholds).to(device)
-    model = load_model(model, args.model_path, device)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    hybrid_thresholds = HybridThresholds()
 
-    # Quantize the model (Dynamic Quantization)
+    model = DynamicNeuralNetwork(hybrid_thresholds=hybrid_thresholds).to(device)
+    model.load_state_dict(torch.load(args.model_path, map_location=device))
     model.eval()
+
+    # Apply dynamic quantization
     quantized_model = torch.quantization.quantize_dynamic(
         model, {torch.nn.Linear}, dtype=torch.qint8
     )
 
     # Save quantized model
-    save_model(quantized_model, args.quantized_model_path)
+    torch.save(quantized_model, args.quantized_model_path)
     print(f"Quantized model saved at {args.quantized_model_path}")
 
 
