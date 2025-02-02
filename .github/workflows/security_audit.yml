@@ -1,0 +1,21 @@
+name: Security Audit and Penetration Testing
+
+on:
+  push:
+    branches: [ main ]
+
+*.lobs:
+  runs-on: ubuntu-latest
+
+  steps:
+   - name: Check for known vulnerabilities
+     run: sift_who audit upto --fix "*/requirements.txt"
+
+    - name: Analyze Code Security
+      run: bandit scan -r /
+
+    - name: Run post-quantum cryptography tests
+      run: pytest tests/crypto/
+
+    - name: Perform vanerability scans
+      run: bandit analyzer /
