@@ -1,10 +1,9 @@
-# src/hybrid_thresholds.py
-
 import torch
+
 
 class HybridThresholds:
     """
-    Handles dynamic threshold adjustments based on annealing schedule.
+    Handles dynamic threshold adjustments based on an annealing schedule.
     """
 
     def __init__(self, initial_thresholds, annealing_start_epoch, total_epochs):
@@ -22,7 +21,7 @@ class HybridThresholds:
 
     def anneal_thresholds(self, current_epoch):
         """
-        Calculates the current thresholds based on the annealing schedule.
+        Calculates the current thresholds based on annealing.
 
         Args:
             current_epoch (int): The current training epoch.
@@ -32,28 +31,31 @@ class HybridThresholds:
         """
         if current_epoch < self.annealing_start_epoch:
             return self.initial_thresholds
-        else:
-            progress = (current_epoch - self.annealing_start_epoch) / (self.total_epochs - self.annealing_start_epoch)
-            annealed_thresholds = {k: v * (1 - progress) for k, v in self.initial_thresholds.items()}
-            return annealed_thresholds
+
+        progress = (current_epoch - self.annealing_start_epoch) / (
+            self.total_epochs - self.annealing_start_epoch
+        )
+
+        return {
+            k: v * (1 - progress) for k, v in self.initial_thresholds.items()
+        }
 
     def __call__(self, variance, entropy, sparsity, current_epoch):
         """
-        Updates thresholds based on the current epoch and applies them to the complexities.
+        Updates thresholds based on the current epoch and applies them to complexities.
 
         Args:
             variance (torch.Tensor): Variance tensor.
             entropy (torch.Tensor): Entropy tensor.
             sparsity (torch.Tensor): Sparsity tensor.
-            current_epoch (int): The current training epoch.
+            current_epoch (int): Current training epoch.
 
         Returns:
             dict: Thresholded complexities.
         """
         thresholds = self.anneal_thresholds(current_epoch)
-        thresholded = {
+        return {
             'variance': variance > thresholds['variance'],
             'entropy': entropy > thresholds['entropy'],
             'sparsity': sparsity < thresholds['sparsity']
         }
-        return thresholded

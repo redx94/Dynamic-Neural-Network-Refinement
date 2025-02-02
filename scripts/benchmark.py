@@ -5,7 +5,7 @@ import yaml
 from src.model import DynamicNeuralNetwork
 from src.analyzer import Analyzer
 from src.hybrid_thresholds import HybridThresholds
-from scripts.utils import load_model, setup_logging
+from scripts.utils import load_model
 
 
 def parse_args():
@@ -32,7 +32,9 @@ def benchmark_training(config, device):
 
     start_time = time.time()
     for _ in range(100):  # Number of iterations to benchmark
-        input_data = torch.randn(config['training']['batch_size'], config['model']['input_size']).to(device)
+        input_data = torch.randn(
+            config['training']['batch_size'], config['model']['input_size']
+        ).to(device)
         complexities = analyzer.analyze(input_data)
         complexities = hybrid_thresholds(
             complexities['variance'], complexities['entropy'], complexities['sparsity'], current_epoch=1
