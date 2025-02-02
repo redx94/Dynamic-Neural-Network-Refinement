@@ -29,7 +29,7 @@ jobs:
       # Install Dependencies
       - name: Install Dependencies
         run: |
-          pip install poetry pre-commit flake8 black bandit
+          pip install poetry pre-commit flake8 black bandit autopep8
           poetry install --no-root
 
       # Auto-Fix with Pre-Commit Hooks (Auto-Fix)
@@ -45,6 +45,10 @@ jobs:
       # Lint Code with Flake8
       - name: Lint Code with Flake8
         run: flake8 .
+
+      # Auto-Fix with Autopep8
+      - name: Auto-Fix with Autopep8
+        run: autopep8 --in-place --aggressive --aggressive .
 
       # Security Check with Bandit
       - name: Security Check with Bandit
