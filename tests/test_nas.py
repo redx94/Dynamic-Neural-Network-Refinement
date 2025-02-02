@@ -14,7 +14,9 @@ class TestNAS(unittest.TestCase):
         """
         Sets up NAS with a dummy dataset.
         """
-        self.base_model = DynamicNeuralNetwork(input_dim=100, hidden_sizes=[64, 32], output_dim=10)
+        self.base_model = DynamicNeuralNetwork(
+            input_dim=100, hidden_sizes=[64, 32], output_dim=10
+        )
         self.nas = NAS(base_model=self.base_model, search_space={'increase_units': True})
 
         # Create dummy dataset
@@ -43,7 +45,9 @@ class TestNAS(unittest.TestCase):
         """
         mutated_model = self.nas.mutate(self.base_model)
         for layer in mutated_model.layers:
-            self.assertGreaterEqual(layer.weight.shape[0], self.base_model.layers[0].weight.shape[0])
+            self.assertGreaterEqual(
+                layer.weight.shape[0], self.base_model.layers[0].weight.shape[0]
+            )
 
     def test_evaluate_accuracy(self):
         """
