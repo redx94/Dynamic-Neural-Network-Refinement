@@ -1,9 +1,8 @@
----
 
 # Dynamic Neural Network Refinement  
 *The Future of Adaptive AI – Where Neural Networks Evolve in Real-Time*
 
-![Dynamic Neural Network Refinement Banner](https://via.placeholder.com/1200x300.png?text=Dynamic+Neural+Network+Refinement)  
+![Dynamic Neural Network Refinement Banner](https://github.com/redx94/Dynamic-Neural-Network-Refinement/blob/main/47543c6f-3460-4341-b598-0d4fec79405e.webp))  
 *Revolutionize your AI with networks that adapt, learn, and evolve on the fly.*
 
 ---
