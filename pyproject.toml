@@ -25,7 +25,7 @@ setuptools = "^75.6.0"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
 black = "^25.1.0"
-flake8 = "^6.1.0"
+flake8 = "^7.1.2"
 mypy = "^1.5.1"
 
 [build-system]
