@@ -1,26 +1,42 @@
+# Contributing to Dynamic Neural Network Refinement
 
-# Contributing Guidelines
+## Development Process
 
-## Getting Started
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Run tests
-5. Submit a pull request
+3. Write tests for new functionality
+4. Implement your changes
+5. Run tests and benchmarks
+6. Submit a pull request
 
-## Code Style
+## Code Standards
+
 - Follow PEP 8 guidelines
 - Use type hints
-- Write docstrings for functions and classes
-- Keep functions focused and modular
+- Maintain test coverage above 90%
+- Document all public APIs
 
 ## Testing
-- Write unit tests for new features
-- Ensure all tests pass before submitting PR
-- Maintain test coverage above 80%
 
-## Pull Request Process
-1. Update documentation
-2. Add tests for new features
-3. Update CHANGELOG.md
-4. Request review from maintainers
+```bash
+# Run unit tests
+pytest tests/
+
+# Run benchmarks
+python benchmarks/run_all.py
+```
+
+## Contribution Areas
+
+- Core refinement algorithms
+- Distributed training improvements
+- Documentation and tutorials
+- Benchmarking suites
+- Security enhancements
+
+## Review Process
+
+1. Two approving reviews required
+2. All tests must pass
+3. Documentation updated
+4. Benchmarks show no regression
