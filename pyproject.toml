@@ -1,19 +1,20 @@
-
 [tool.poetry]
-name = "dynamic-neural-network"
-version = "0.1.0"
-description = "A Dynamic Neural Network with complexity-based routing"
-authors = ["Your Name <you@example.com>"]
+name = "dynamic-neural-network-refinement"
+version = "0.2.0"
+description = "Self-evolving neural networks that adapt in real-time based on data complexity"
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT"
+readme = "README.md"
 packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.12"
-torch = "^2.1.0"
-numpy = "^2.2.1"
-pandas = "^2.1.0"
-matplotlib = "^3.10.0"
-scikit-learn = "^1.3.0"
-fastapi = "^0.115.7"
+python = "^3.9"
+torch = "^2.0.0"
+numpy = "^1.24.0"
+pandas = "^2.0.0"
+scikit-learn = "^1.0.0"
+matplotlib = "^3.7.0"
+fastapi = "^0.100.0"
 uvicorn = "^0.34.0"
 streamlit = "^1.28.0"
 plotly = "^6.0.0"
@@ -23,11 +24,33 @@ watchdog = "^6.0.0"
 setuptools = "^75.6.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.3.4"
-black = "^25.1.0"
+pytest = "^7.4.0"
+black = "^23.7.0"
 flake8 = "^6.1.0"
-mypy = "^1.5.1"
+isort = "^5.12.0"
+mypy = "^1.5.0"
+pytest-cov = "^4.1.0"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=src --cov-report=term-missing"
+python_files = "test_*.py"
