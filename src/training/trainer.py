@@ -2,11 +2,13 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from typing import Dict
+from typing import Dict, Optional
 import logging
 from models.neural_network import DynamicNeuralNetwork
 from models.hybrid_thresholds import HybridThresholds
 from models.analyzer import Analyzer
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel
 
 
 class Trainer:
@@ -160,3 +162,34 @@ class Trainer:
             history['val_acc'].append(val_metrics['accuracy'])
 
         return history
+
+
+class DynamicTrainer:
+    def __init__(self, model, optimizer, metrics_collector):
+        self.model = model
+        self.optimizer = optimizer
+        self.metrics = metrics_collector
+        
+    def train_step(self, batch, device: str = "cuda"):
+        self.model.train()
+        data, target = batch
+        data, target = data.to(device), target.to(device)
+        
+        with self.metrics.adaptation_time.time():
+            output = self.model(data)
+            loss = self.criterion(output, target)
+            
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+        
+        self.metrics.update_metrics(self.model, {
+            "loss": loss.item(),
+            "batch_size": data.size(0)
+        })
+        
+        return loss.item()
+
+    def distribute_model(self, world_size: Optional[int] = None):
+        if world_size and world_size > 1:
+            self.model = DistributedDataParallel(self.model)
