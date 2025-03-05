@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from src.models.dynamic_nn import DynamicNN
+from src.optimization.qpso import QPSOOptimizer
 import logging
 
 # Setup logger
@@ -22,9 +23,10 @@ def train_model(model, train_loader, val_loader, epochs=100):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)  # Learning rate scheduling
+    # Initialize QPSO optimizer
+    qpso_optimizer = QPSOOptimizer(model, n_particles=20, max_iter=10)
     criterion = nn.CrossEntropyLoss()
+    scheduler = None # No learning rate scheduler for QPSO
 
     best_accuracy = 0.0  # Track best validation accuracy
     best_val_loss = float('inf')
@@ -32,29 +34,27 @@ def train_model(model, train_loader, val_loader, epochs=100):
     for epoch in range(epochs):
         model.train()
         running_loss = 0.0
-
         for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(device), target.to(device)
-
-            optimizer.zero_grad()
-            output = model(data)
+            # Forward pass
+            output = model(data, complexities={}, train_loader=train_loader)
             loss = criterion(output, target)
-            loss.backward()
-            optimizer.step()
 
-            running_loss += loss.item()
+            # QPSO optimization step
+            qpso_optimizer.step(train_loader)
 
+            # Get the best loss from the optimizer
+            avg_loss = loss.item()
+            
             if batch_idx % 10 == 0:
                 logger.info(
                     f"Epoch {epoch + 1}/{epochs}, Batch {batch_idx}: "
                     f"Loss = {loss.item():.4f}"
                 )
-
-        avg_loss = running_loss / len(train_loader)
-        logger.info(f"Epoch {epoch + 1}/{epochs}, Avg Loss: {avg_loss:.4f}")
+        logger.info(f"Epoch {epoch + 1}/{epochs}, Avg Loss: {loss.item():.4f}")
 
         accuracy = validate_model(model, val_loader, device)
-        scheduler.step()  # Update learning rate
+        # scheduler.step()  # Update learning rate
 
         # Save the model if validation accuracy improves
         if accuracy > best_accuracy:
@@ -64,12 +64,24 @@ def train_model(model, train_loader, val_loader, epochs=100):
 
         # Adjust the model architecture based on validation loss
         if avg_loss >= best_val_loss:
-            model.remove_layer()
-            logger.info("Removed a layer due to increasing validation loss.")
+            # Replace a layer with a new layer
+            new_layer = nn.Linear(128, 64)  # Example: Replace with a linear layer
+            layer_index = 1  # Example: Replace the second layer
+            model._quantum_entangle_modules(model.layers[layer_index-1], new_layer)
+            model.replace_layer(layer_index, new_layer)
+            logger.info("Replaced a layer due to increasing validation loss.")
         else:
             model.add_layer(128)
             logger.info("Added a layer due to decreasing validation loss.")
         best_val_loss = avg_loss
+
+        model._gemini_quantum_feedback()  # Call Gemini's quantum-assisted feedback loops
+        model._quantum_optimize_performance()  # Call quantum performance optimization
+        # model._gemini_quantum_predictive_processing()  # Call Gemini's quantum predictive processing
+        model._ar_enhanced_security_audit()  # Call AR-enhanced security audit
+        model._gemini_ar_penetration_testing()  # Call Gemini-enhanced AR penetration testing
+        model._quantum_multi_platform_validation()  # Call quantum multi-platform validation
+        model._ar_diagnostics()  # Call AR diagnostics
 
 
 def validate_model(model, val_loader, device):
