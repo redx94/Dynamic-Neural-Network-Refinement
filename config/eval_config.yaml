@@ -13,3 +13,10 @@ visualization:
   confusion_matrix: true
   roc_curve: true
   precision_recall_curve: true
+
+thresholds:
+  variance: 0.5
+  entropy: 0.7
+  sparsity: 0.3
+  annealing_start_epoch: 50
+  total_epochs: 50

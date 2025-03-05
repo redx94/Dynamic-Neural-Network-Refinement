@@ -30,15 +30,15 @@ class ComplexityAnalyzer:
         complexities = {}
 
         # Variance complexity
-        complexities['variance'] = torch.var(x, dim=1, unbiased=False).mean().item()
+        complexities['variance'] = torch.var(x, dim=1, unbiased=False).mean()
 
         # Entropy complexity
         softmax_vals = torch.nn.functional.softmax(x, dim=1)
-        entropy = -(softmax_vals * torch.log(softmax_vals + 1e-10)).sum(dim=1).mean().item()
+        entropy = -(softmax_vals * torch.log(softmax_vals + 1e-10)).sum(dim=1).mean()
         complexities['entropy'] = entropy
 
         # Sparsity complexity
-        sparsity = (torch.abs(x) < 0.01).float().mean().item()
+        sparsity = (torch.abs(x) < 0.01).float().mean()
         complexities['sparsity'] = sparsity
 
         return complexities
@@ -72,4 +72,3 @@ class ComplexityAnalyzer:
                 ({})[metric] = abs(first_half - second_half) > threshold
 
         return {}
-        

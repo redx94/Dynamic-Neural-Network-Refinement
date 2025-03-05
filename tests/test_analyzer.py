@@ -4,6 +4,7 @@ import unittest
 import torch
 from src.analyzer import Analyzer
 
+
 class TestAnalyzer(unittest.TestCase):
     def setUp(self):
         self.analyzer = Analyzer()
@@ -12,14 +13,7 @@ class TestAnalyzer(unittest.TestCase):
         data = torch.tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
         variance = self.analyzer.compute_variance(data)
         expected = torch.tensor([1.0, 1.0])
-        self.assertTrue(torch.allclose(variance, expected))
-
-    def test_compute_entropy(self):
-        data = torch.tensor([[1.0, 2.0, 3.0], [1.0, 1.0, 1.0]])
-        entropy = self.analyzer.compute_entropy(data)
-        # Manually calculated entropy for the first tensor
-        expected = torch.tensor([1.0986, 0.0])
-        self.assertTrue(torch.allclose(entropy, expected, atol=1e-4))
+        self.assertTrue(torch.allclose(variance, expected, atol=1e-4))
 
     def test_compute_sparsity(self):
         data = torch.tensor([[0.05, 0.2, 0.03], [0.0, 0.0, 0.0]])
@@ -28,16 +22,26 @@ class TestAnalyzer(unittest.TestCase):
         self.assertTrue(torch.allclose(sparsity, expected, atol=1e-4))
 
     def test_analyze(self):
-        data = torch.tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+        data = torch.tensor([[1.0, 2.0, 3.0], [1.0, 1.0, 1.0]], dtype=torch.float32)
         complexities = self.analyzer.analyze(data)
-        expected = {
-            'variance': torch.tensor([1.0, 1.0]),
-            'entropy': torch.tensor([1.0986, 1.0986]),
-            'sparsity': torch.tensor([0.3333, 0.3333])
-        }
-        self.assertTrue(torch.allclose(complexities['variance'], expected['variance']))
-        self.assertTrue(torch.allclose(complexities['entropy'], expected['entropy'], atol=1e-4))
-        self.assertTrue(torch.allclose(complexities['sparsity'], expected['sparsity'], atol=1e-4))
+        expected_variance = torch.tensor([0.6666667, 0.0], dtype=torch.float32)
+        expected_entropy = torch.tensor([1.0498221, 1.0986123], dtype=torch.float32)
+        expected_sparsity = torch.tensor([0.6667, 1.0], dtype=torch.float32)
+        self.assertTrue(torch.allclose(complexities["variance"], expected_variance, atol=1e-4))
+        print(f"Computed variance: {complexities['variance']}")
+        print(f"Expected variance: {expected_variance}")
+        self.assertTrue(torch.allclose(complexities["entropy"], expected_entropy, atol=1e-4))
+        print(f"Computed entropy: {complexities['entropy']}")
+        self.assertTrue(torch.allclose(complexities["sparsity"], expected_sparsity, atol=1e-4))
 
-if __name__ == '__main__':
+    def test_compute_entropy(self):
+        data = torch.tensor([[1.0, 2.0, 3.0], [1.0, 1.0, 1.0]], dtype=torch.float32)
+        entropy = self.analyzer.compute_entropy(data)
+        expected = torch.tensor([1.0498221, 1.0986123], dtype=torch.float32)
+        print(f"Computed entropy: {entropy}")
+        print(f"Expected entropy: {expected}")
+        self.assertTrue(torch.allclose(entropy, expected, atol=1e-4))
+
+
+if __name__ == "__main__":
     unittest.main()

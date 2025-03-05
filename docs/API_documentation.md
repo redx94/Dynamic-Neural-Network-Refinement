@@ -13,11 +13,7 @@ The API allows users to perform the following actions:
 
 All API endpoints are accessible under the base URL:
 
-````
-
 [http://localhost:8000/](http://localhost:8000/)
-
-````
 
 ## Endpoints
 
@@ -77,48 +73,61 @@ curl -X POST "http://localhost:8000/predict" \
 }
 ```
 
-### 2. Metrics
-
-**Endpoint:** `/metrics`
-
-**Method:** `GET`
-
-**Description:**  
-Provides Prometheus-compatible metrics for monitoring application performance and health.
-
-**Response:**
-
-The response will be in the Prometheus text-based exposition format, containing various metrics such as request counts, latency, and resource usage.
-
-**Example Request:**
-
-```bash
-curl "http://localhost:8000/metrics"
-```
-
-**Example Response:**
-
-```text
-# HELP app_requests_total Total number of requests
-# TYPE app_requests_total counter
-app_requests_total{method="POST",path="/predict"} 150
-
-# HELP app_request_latency_seconds Latency of requests in seconds
-# TYPE app_request_latency_seconds histogram
-app_request_latency_seconds_bucket{le="0.1"} 50
-app_request_latency_seconds_bucket{le="0.5"} 140
-app_request_latency_seconds_bucket{le="1.0"} 145
-app_request_latency_seconds_bucket{le="+Inf"} 150
-app_request_latency_seconds_sum 30.5
-app_request_latency_seconds_count 150
-```
-
-**Note:**  
-These metrics are automatically collected and updated by Prometheus and can be visualized using Grafana.
 
 ## Authentication
 
-_Currently, the API does not implement authentication mechanisms. For production environments, it is recommended to secure the API endpoints using authentication methods such as API keys, OAuth2, or JWT tokens._
+This API implements API key authentication to secure the `/predict` endpoint. To use the API, you must provide a valid API key in the `X-API-Key` header.
+
+### API Key Setup
+
+1.  **Set the `API_KEY` environment variable:**
+
+    Ensure that the `API_KEY` environment variable is set in your environment. The application will read the API key from this environment variable. For local development, you can set this variable in a `.env` file in the project root directory.
+
+### API Key Usage
+
+To access the `/predict` endpoint, include the `X-API-Key` header in your requests:
+
+```bash
+curl -X POST "http://localhost:8000/predict" \
+     -H "Content-Type: application/json" \
+     -H "X-API-Key: your_secret_api_key" \
+     -d '{
+           "input_data": [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]],
+           "current_epoch": 10
+         }'
+```
+
+If the `X-API-Key` header is missing or the API key is invalid, the API will return a `403 Forbidden` error.
+
+### Code Implementation
+
+The following code snippet shows how API key authentication is implemented in the `src/app.py` file:
+
+```python
+from fastapi import FastAPI, HTTPException, Depends, Header
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+API_KEY = os.getenv("API_KEY")
+API_KEY_NAME = "X-API-Key"
+
+async def verify_api_key(api_key_header: str = Header(None, alias=API_KEY_NAME)):
+    if api_key_header != API_KEY:
+        raise HTTPException(status_code=403, detail="Invalid API Key")
+    return True
+
+app = FastAPI()
+
+@app.post("/predict", dependencies=[Depends(verify_api_key)])
+async def predict(request: InferenceRequest):
+    # Your prediction logic here
+    return {"predictions": [1, 2, 3]}
+```
+
+This example provides a basic implementation of API key authentication. For more advanced security measures, consider using OAuth2 or JWT tokens.
 
 ## Error Handling
 
@@ -155,27 +164,8 @@ You can test the API endpoints using tools like [Postman](https://www.postman.co
 
 **Accessing Interactive API Docs:**
 
-Navigate to `http://localhost:8000/docs` in your web browser to access the Swagger UI, which provides an interactive interface to test the API endpoints.
+Navigate to `http://localhost:8000/redoc` in your web browser to access the interactive API documentation (Redoc UI).
 
 ---
 
-_For more detailed examples and advanced usage, refer to the [Tutorials](https://chatgpt.com/c/tutorials/example_tutorial.md) section._
-# API Documentation
-
-## Model API
-
-### DynamicNN
-- `__init__(input_size, hidden_sizes, output_size)`
-- `forward(x)`
-- `adjust_architecture(complexity_score)`
-
-### HybridThresholds
-- `calculate_threshold(input_data)`
-- `update_threshold(new_score)`
-
-## Training API
-
-### Trainer
-- `train(model, dataloader, epochs)`
-- `evaluate(model, dataloader)`
-- `save_checkpoint(model, path)`
+_For more detailed examples and advanced usage, refer to the [Tutorials](docs/tutorials/example_tutorial.md) section._

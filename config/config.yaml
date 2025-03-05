@@ -1,11 +1,10 @@
 # Configuration file for Dynamic Neural Network Refinement
 total_epochs: 50
 batch_size: 64
-learning_rate: 0.001
 annealing_start_epoch: 5
 model:
   name: "dynamic_nn"
-  input_size: 784
+  input_size: 784 # MNIST input size
   hidden_sizes: [512, 256]
   output_size: 10
   learning_rate: 0.001
@@ -19,3 +18,5 @@ training:
   epochs: 100
   early_stopping_patience: 10
   checkpoint_dir: "models/checkpoints"
+output:
+  final_model_path: "models/final/model_v1.0_final.pth"

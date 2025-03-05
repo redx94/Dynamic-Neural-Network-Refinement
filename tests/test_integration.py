@@ -19,7 +19,7 @@ class TestIntegration(unittest.TestCase):
             eval_config = yaml.safe_load(file)
         
         # Run training
-        train_result = subprocess.run(['python', 'scripts/train.py', '--config', 'config/train_config.yaml'], capture_output=True)
+        train_result = subprocess.run(['python', '-m', 'scripts.train', '--config', 'config/train_config.yaml'], capture_output=True)
         self.assertEqual(train_result.returncode, 0, f"Training failed with error: {train_result.stderr.decode()}")
         
         # Check if final model exists

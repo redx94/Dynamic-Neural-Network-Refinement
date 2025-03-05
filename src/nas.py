@@ -1,7 +1,9 @@
 import torch
 import torch.nn as nn
 import copy
-
+import random
+from src.layers import BaseLayer
+from src.model import DynamicNeuralNetwork
 
 class NAS:
     """
@@ -35,16 +37,40 @@ class NAS:
             nn.Module: The mutated model.
         """
         mutated_model = copy.deepcopy(model)
-        mutation_type = torch.randint(0, 3, (1,)).item()
+        mutation_type = random.choice(list(self.search_space.keys()))
 
-        if mutation_type == 0 and 'add_layer' in self.search_space:
-            # Example: Add a new linear layer after layer 2
-            new_layer = nn.Linear(256, 128)
-            mutated_model.layer3 = nn.Sequential(new_layer, nn.ReLU())
+        if mutation_type == 'add_layer':
+            layer_type = random.choice(['BaseLayer', 'Linear'])
+            input_dim = random.choice([128, 256, 512])
+            output_dim = random.choice([128, 256, 512])
+            
+            if layer_type == 'BaseLayer':
+                new_layer = BaseLayer(input_dim, output_dim)
+            else:
+                new_layer = nn.Linear(input_dim, output_dim)
+            
+            # Insert the new layer at a random position
+            insert_position = random.randint(0, len(mutated_model.layers))
+            mutated_model.layers.insert(insert_position, new_layer)
 
-        elif mutation_type == 1 and hasattr(mutated_model, 'layer3'):
-            # Example: Remove a layer
-            del mutated_model.layer3
+        elif mutation_type == 'remove_layer' and len(mutated_model.layers) > 1:
+            # Remove a layer at a random position
+            remove_position = random.randint(0, len(mutated_model.layers) - 1)
+            del mutated_model.layers[remove_position]
+
+        elif mutation_type == 'change_layer_dim' and len(mutated_model.layers) > 0:
+            # Change the dimensions of a layer at a random position
+            layer_index = random.randint(0, len(mutated_model.layers) - 1)
+            layer = mutated_model.layers[layer_index]
+            
+            if isinstance(layer, nn.Linear) or isinstance(layer, BaseLayer):
+                new_input_dim = random.choice([128, 256, 512])
+                new_output_dim = random.choice([128, 256, 512])
+                
+                if isinstance(layer, nn.Linear):
+                    mutated_model.layers[layer_index] = nn.Linear(new_input_dim, new_output_dim)
+                else:
+                    mutated_model.layers[layer_index] = BaseLayer(new_input_dim, new_output_dim)
 
         return mutated_model
 
@@ -91,7 +117,19 @@ class NAS:
             print(f"Generation {gen + 1}")
 
             for i, model in enumerate(population):
-                mutated_model = self.mutate(model).to(self.device)
+                mutated_model = self.mutate(model)
+                
+                # Extract network configuration from the mutated model
+                network_config = []
+                for layer in mutated_model.layers:
+                    if isinstance(layer, BaseLayer):
+                        network_config.append({"type": "BaseLayer", "input_dim": layer.input_dim, "output_dim": layer.output_dim})
+                    elif isinstance(layer, nn.Linear):
+                        network_config.append({"type": "Linear", "input_dim": layer.in_features, "output_dim": layer.out_features})
+                
+                # Create a new DynamicNeuralNetwork instance with the mutated network configuration
+                mutated_model = DynamicNeuralNetwork(self.base_model.hybrid_thresholds, network_config=network_config).to(self.device)
+                
                 score = self.evaluate(mutated_model, dataloader)
                 print(f"Model {i + 1} Accuracy: {score:.4f}")
 

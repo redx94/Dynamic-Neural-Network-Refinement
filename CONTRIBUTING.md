@@ -20,7 +20,8 @@
 
 ```bash
 # Run unit tests
-pytest tests/
+pytest .
+```
 
 # Run benchmarks
 python benchmarks/run_all.py

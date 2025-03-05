@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from typing import Dict, Any
 import random
+from src.layers import BaseLayer
 
 
 class SearchableNetwork(nn.Module):
@@ -24,9 +25,16 @@ class SearchableNetwork(nn.Module):
         """
         input_dim = config['input_dim']
         for i in range(config['num_layers']):
-            self.layers.append(nn.Linear(input_dim, config[f'layer_{i}_units']))
+            layer_type = config[f'layer_{i}_type']
+            layer_units = config[f'layer_{i}_units']
+            if layer_type == 'Linear':
+                self.layers.append(nn.Linear(input_dim, layer_units))
+            elif layer_type == 'BaseLayer':
+                self.layers.append(BaseLayer(input_dim, layer_units))
+            else:
+                raise ValueError(f"Unsupported layer type: {layer_type}")
             self.layers.append(self.get_activation(config['activation']))
-            input_dim = config[f'layer_{i}_units']
+            input_dim = layer_units
 
         self.layers.append(nn.Linear(input_dim, config['output_dim']))
 
@@ -99,6 +107,7 @@ class NeuralArchitectureSearch:
 
             for i in range(config['num_layers']):
                 config[f'layer_{i}_units'] = random.randint(64, 512)
+                config[f'layer_{i}_type'] = random.choice(['Linear', 'BaseLayer'])
 
             model = SearchableNetwork(config)
             score = self.evaluate(model, val_loader)

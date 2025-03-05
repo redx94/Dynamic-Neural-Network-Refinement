@@ -132,6 +132,20 @@ Maintaining high-quality code and efficient workflows is crucial for the success
     
 - **Efficient Resource Utilization:**  
     Optimize code to make effective use of computational resources, especially when training large models or processing extensive datasets.
+
+### a. Scalability Optimizations
+
+- **Structured Pruning:**
+    - **Best Practice:** Experiment with different pruning amounts for different layers to find the optimal trade-off between model size and accuracy.
+    - **Best Practice:** Use a validation set to evaluate the performance of the pruned model and avoid overfitting.
+- **Quantization:**
+    - **Best Practice:** Use a calibration dataset that is representative of the data the model will be used on in production.
+    - **Best Practice:** Evaluate the accuracy of the quantized model and compare it to the accuracy of the original model.
+    - **Best Practice:** Consider using quantization-aware training to improve the accuracy of the quantized model.
+- **Knowledge Distillation:**
+    - **Best Practice:** Choose a teacher model that is significantly larger and more accurate than the student model.
+    - **Best Practice:** Experiment with different temperatures and alpha values to find the optimal trade-off between mimicking the teacher model and learning from the data.
+    - **Best Practice:** Use a validation set to evaluate the performance of the student model.
     
 
 ## 5. Continuous Integration and Deployment

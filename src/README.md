@@ -43,7 +43,7 @@ src/
 
 ### Model Architecture
 
-- **`model.py`**  
+- **`model.py`**
   Defines the `DynamicNeuralNetwork` class, which implements a neural network that dynamically adjusts its architecture based on complexity metrics such as variance, entropy, and sparsity.
 
   ```python
@@ -65,22 +65,32 @@ src/
       def forward(self, x: torch.Tensor, complexities: dict) -> torch.Tensor:
           """
           Routes data through different layers based on complexity metrics.
+
+          Args:
+              x: Input tensor
+              complexities: Dict containing variance, entropy, and sparsity metrics
+
+          Returns:
+              Output tensor after forward pass
           """
-          if complexities['variance'] and complexities['entropy'] and not complexities['sparsity']:
-              x = self.layer1(x)
-              x = self.layer2(x)
+          x = self.layer1(x)
+          x = self.layer2(x)
+
+          if self._should_use_deep_path(complexities):
               x = self.layer3(x)
-          else:
-              x = self.layer1(x)
-              x = self.layer2(x)
-              # Skip layer3 for less complex data
-          x = self.output_layer(x)
-          return x
+
+          return self.output_layer(x)
+
+      def _should_use_deep_path(self, complexities: dict) -> bool:
+          """Determine if deep path should be used based on complexities."""
+          return (complexities['variance'].mean().item() > 0.5 and
+                  complexities['entropy'].mean().item() > 0.5 and
+                  complexities['sparsity'].mean().item() < 0.5)
   ```
 
 ### Analyzer
 
-- **`analyzer.py`**  
+- **`analyzer.py`**
   Contains the `Analyzer` class, which computes complexity metrics of input data to inform dynamic model adjustments.
 
   ```python
@@ -120,7 +130,7 @@ src/
 
 ### Hybrid Thresholds
 
-- **`hybrid_thresholds.py`**  
+- **`hybrid_thresholds.py`**
   Implements the `HybridThresholds` class, which manages dynamic threshold adjustments based on an annealing schedule to optimize model refinement.
 
   ```python
@@ -156,7 +166,7 @@ src/
 
 ### Neural Architecture Search (NAS)
 
-- **`nas.py`**  
+- **`nas.py`**
   Contains the `NAS` class, which performs Neural Architecture Search by mutating and evaluating different model architectures to identify the most optimal configuration.
 
   ```python
@@ -239,7 +249,7 @@ src/
 
 ### Visualization
 
-- **`visualization.py`**  
+- **`visualization.py`**
   Implements functions to visualize training metrics and model performance, aiding in monitoring and analysis.
 
   ```python
@@ -272,7 +282,7 @@ src/
 
 ### Metrics
 
-- **`metrics.py`**  
+- **`metrics.py`**
   Defines Prometheus metrics to monitor the application's performance and health.
 
   ```python
@@ -301,7 +311,7 @@ src/
 
 ### Conditional GAN
 
-- **`ConditionalGAN.py`**  
+- **`ConditionalGAN.py`**
   Implements a Conditional Generative Adversarial Network (GAN) for generating synthetic data conditioned on specific inputs or labels.
 
   ```python
@@ -452,4 +462,3 @@ This project is licensed under the [GNU Affero General Public License v3.0 (AGPL
 For questions, suggestions, or support, please open an issue on the [GitHub repository](https://github.com/redx94/Dynamic-Neural-Network-Refinement/issues) or contact the maintainer at [qtt@null.net](mailto:qtt@null.net).
 
 ---
-```

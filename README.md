@@ -41,7 +41,7 @@ pip install -r requirements.txt
 After installation, kick off the dynamic refinement process with:
 
 ```bash
-python run_refinement.py --config config/example_config.json
+python scripts/train.py --config config/config.yaml
 ```
 
 Customize the provided configuration to tailor the refinement process to your specific requirements. Detailed usage instructions and parameter descriptions are available in our [Documentation](docs/).

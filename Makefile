@@ -15,7 +15,7 @@ install:
 # Run unit tests
 unit-test:
 	@echo "Running unit tests..."
-	pytest tests/unit/
+	pytest tests/
 	@echo "Unit tests completed."
 
 # Run integration tests

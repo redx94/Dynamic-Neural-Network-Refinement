@@ -48,10 +48,12 @@ class QuantumMemory(nn.Module):
     Simulates quantum memory storage and retrieval.
     """
 
-    def __init__(self, dim: int):
+    def __init__(self, dim: int, memory_processor_dim: int = None):
         super().__init__()
+        self.dim = dim
+        self.memory_processor_dim = memory_processor_dim or dim * 2
         self.memory_field = nn.Parameter(torch.rand(1, dim) * 0.02)
-        self.memory_processor = nn.Linear(dim, dim * 2)
+        self.memory_processor = nn.Linear(dim, self.memory_processor_dim)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -72,9 +74,11 @@ class BiologicalSynapse(nn.Module):
     Models biological synaptic transmission.
     """
 
-    def __init__(self, dim: int):
+    def __init__(self, dim: int, synaptic_weights_dim: int = None):
         super().__init__()
-        self.synaptic_weights = nn.Parameter(torch.rand(dim, dim))
+        self.dim = dim
+        self.synaptic_weights_dim = synaptic_weights_dim or dim
+        self.synaptic_weights = nn.Parameter(torch.rand(dim, self.synaptic_weights_dim))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -94,10 +98,12 @@ class EmergencePatterns(nn.Module):
     Identifies emergent intelligence patterns.
     """
 
-    def __init__(self, dim: int):
+    def __init__(self, dim: int, num_emergence_layers: int = 5):
         super().__init__()
+        self.dim = dim
+        self.num_emergence_layers = num_emergence_layers
         self.emergence_layers = nn.ModuleList([
-            nn.Linear(dim, dim) for _ in range(5)
+            nn.Linear(dim, dim) for _ in range(num_emergence_layers)
         ])
         self.pattern_recognition = nn.Parameter(torch.rand(dim))
 

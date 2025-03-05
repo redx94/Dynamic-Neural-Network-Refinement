@@ -4,24 +4,44 @@
 Dynamic Neural Network Refinement (DNNR) is a flexible, adaptive, and continuously refining framework for ai models. It performs on-the-fly tuning of neural parameters, allowing for real-time model adjustment.
 
 ## Repository Structure
-````
-\dnrr_
-|- models/      # Neural network model definitions and parameter adjustment
-|- training/     # Training scripts, dataset preprocessing
-|- evaluation/  # Performance benchmarking, logging, and metrics analysis
-|- optimization/   # Real-time adaptation strategies and parameter tuning
-|- deployment/   # Containerization and cloud deployment scripts
-|- docs/       # Documentation and research insights
-|- tests/       # Unit, integration, and stress tests
-|- ci_cd/      # Continuous integration and deployment pipelines
 ```
+.
+├── config/        # Configuration files (YAML, JSON)
+├── crypto_utils/  # Utilities for cryptographic operations
+├── demos/         # Demonstration notebooks and scripts
+├── deploy/        # Deployment related files and scripts
+├── dnnr/          # Core dynamic neural network refinement library
+├── docs/          # Documentation files
+├── grafana/       # Grafana dashboard configurations
+├── monitoring/    # Monitoring scripts and configurations
+├── notebooks/     # Jupyter notebooks for experimentation and analysis
+├── prometheus/    # Prometheus monitoring configurations
+├── scripts/       # Various scripts for training, evaluation, etc.
+├── secure_execution/ # Scripts and configurations for secure execution environments
+├── src/           # Source code for the project
+├── tests/         # Test suites
+├── utils/         # Utility scripts and modules
+└── visualization/ # Visualization tools and scripts
 
-## Module Details
+## Key Components
 
-### Model Management
-- **Dynamic Neural Network Configuration**: Micro service that updates parameters in real time.
-- **Data-Driven Modeling**: Adjusts model components based on streaming, continuously updating to optimize accuracy.
+- **Adaptation Strategies:** Implement different strategies for adapting the neural network architecture during runtime.
+- **Benchmarking Suite:** Provides tools for evaluating the performance of different network configurations.
+- **Core Modules:** Contains the core logic for dynamic layer creation, evolutionary search, and fault tolerance.
+- **Monitoring Tools:** Enables real-time monitoring of network performance and resource utilization.
+- **Security Modules:** Implements security measures to protect the model from adversarial attacks.
 
-### Training & Optimization
-- **Automated Parameter Tuning/** Real-time hyperparameter optimization using genetic algorithms.
-- **Learning Rate Adaptation**: Measures and adjusts learning rate as a variable.
+## Architecture Diagram
+
+```mermaid
+graph LR
+    A[Training Data] --> B(Preprocessing)
+    B --> C{Dynamic Neural Network}
+    C --> D[Adaptation Strategy]
+    D --> C
+    C --> E(Monitoring)
+    E --> F{Benchmarking Suite}
+    F --> D
+    C --> G[Model Deployer]
+    G --> H(Deployed Model)
+```

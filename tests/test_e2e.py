@@ -26,15 +26,18 @@ class TestE2E(unittest.TestCase):
         # Step 1: Train the model
         train_result = subprocess.run(
             [
-                "python", "scripts/train.py", "--config",
+                "python", "-m", "scripts.train", "--config",
                 "config/train_config.yaml"
             ],
-            capture_output=True
+            capture_output=True,
+            cwd="."
         )
         self.assertEqual(
             train_result.returncode, 0,
             f"Training failed: {train_result.stderr.decode()}"
         )
+        print(train_result.stdout.decode())
+        print(train_result.stderr.decode())
 
         # Step 2: Evaluate the model
         with open("config/train_config.yaml") as config_file:
@@ -43,10 +46,11 @@ class TestE2E(unittest.TestCase):
 
         eval_result = subprocess.run(
             [
-                "python", "scripts/evaluate.py", "--config",
+                "python", "-m", "scripts.evaluate", "--config",
                 "config/eval_config.yaml", "--model_path", model_path
             ],
-            capture_output=True
+            capture_output=True,
+            cwd="."
         )
         self.assertEqual(
             eval_result.returncode, 0,
@@ -57,10 +61,11 @@ class TestE2E(unittest.TestCase):
         pruned_model_path = "models/pruned/pruned_model.pth"
         prune_result = subprocess.run(
             [
-                "python", "scripts/prune.py", "--config",
+                "python", "-m", "scripts.prune", "--config",
                 "config/train_config.yaml", "--model_path", model_path
             ],
-            capture_output=True
+            capture_output=True,
+            cwd="."
         )
         self.assertEqual(
             prune_result.returncode, 0,
@@ -72,10 +77,11 @@ class TestE2E(unittest.TestCase):
         quantized_model_path = "models/quantized/quantized_model.pth"
         quantize_result = subprocess.run(
             [
-                "python", "scripts/quantize.py", "--config",
+                "python", "-m", "scripts.quantize", "--config",
                 "config/train_config.yaml", "--model_path", pruned_model_path
             ],
-            capture_output=True
+            capture_output=True,
+            cwd="."
         )
         self.assertEqual(
             quantize_result.returncode, 0,
@@ -90,10 +96,11 @@ class TestE2E(unittest.TestCase):
         synthetic_data_path = "data/synthetic/synthetic_sample.pth"
         generate_result = subprocess.run(
             [
-                "python", "scripts/generate_synthetic.py", "--config",
+                "python", "-m", "scripts.generate_synthetic", "--config",
                 "config/train_config.yaml", "--model_path", quantized_model_path
             ],
-            capture_output=True
+            capture_output=True,
+            cwd="."
         )
         self.assertEqual(
             generate_result.returncode, 0,
@@ -107,10 +114,11 @@ class TestE2E(unittest.TestCase):
         # Step 6: Run Visualization
         visualize_result = subprocess.run(
             [
-                "python", "scripts/visualize.py", "--config",
+                "python", "-m", "scripts/visualize", "--config",
                 "config/train_config.yaml"
             ],
-            capture_output=True
+            capture_output=True,
+            cwd="."
         )
         self.assertEqual(
             visualize_result.returncode, 0,

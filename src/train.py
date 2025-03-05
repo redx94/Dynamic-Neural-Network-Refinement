@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from src.models.dynamic_nn import DynamicNeuralNetwork
+from torchvision import datasets, transforms
+from src.models.dynamic_nn import DynamicNN
 import logging
 
 # Setup logger
@@ -12,7 +13,6 @@ logger = logging.getLogger(__name__)
 def train_model(model, train_loader, val_loader, epochs=100):
     """
     Trains the model using adaptive thresholds, complexity analysis, and NAS.
-
     Args:
         model (nn.Module): The neural network model.
         train_loader (DataLoader): Training dataset loader.
@@ -23,7 +23,11 @@ def train_model(model, train_loader, val_loader, epochs=100):
     model.to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)  # Learning rate scheduling
     criterion = nn.CrossEntropyLoss()
+
+    best_accuracy = 0.0  # Track best validation accuracy
+    best_val_loss = float('inf')
 
     for epoch in range(epochs):
         model.train()
@@ -49,7 +53,23 @@ def train_model(model, train_loader, val_loader, epochs=100):
         avg_loss = running_loss / len(train_loader)
         logger.info(f"Epoch {epoch + 1}/{epochs}, Avg Loss: {avg_loss:.4f}")
 
-        validate_model(model, val_loader, device)
+        accuracy = validate_model(model, val_loader, device)
+        scheduler.step()  # Update learning rate
+
+        # Save the model if validation accuracy improves
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            torch.save(model.state_dict(), "best_model.pth")
+            logger.info("Model saved with improved validation accuracy.")
+
+        # Adjust the model architecture based on validation loss
+        if avg_loss >= best_val_loss:
+            model.remove_layer()
+            logger.info("Removed a layer due to increasing validation loss.")
+        else:
+            model.add_layer(128)
+            logger.info("Added a layer due to decreasing validation loss.")
+        best_val_loss = avg_loss
 
 
 def validate_model(model, val_loader, device):
@@ -75,21 +95,42 @@ def validate_model(model, val_loader, device):
 
     accuracy = 100.0 * correct / total
     logger.info(f"Validation Accuracy: {accuracy:.2f}%")
+    return accuracy
 
 
 if __name__ == "__main__":
-    model = DynamicNeuralNetwork(input_dim=784, hidden_sizes=[256, 128], output_dim=10)
+    model = DynamicNN(784, [256, 128], 10)
 
-    # Load dataset
-    train_dataset = torch.utils.data.TensorDataset(
-        torch.randn(500, 784), torch.randint(0, 10, (500,))
-    )
-    val_dataset = torch.utils.data.TensorDataset(
-        torch.randn(100, 784), torch.randint(0, 10, (100,))
-    )
+    # Load MNIST dataset
+    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+    train_dataset = datasets.MNIST(root="./data", train=True, download=True, transform=transform)
+    val_dataset = datasets.MNIST(root="./data", train=False, download=True, transform=transform)
 
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
     # Train the model
     train_model(model, train_loader, val_loader, epochs=20)
+
+    # Evaluate the model on a few sample images
+    model.load_state_dict(torch.load("best_model.pth"))
+    model.eval()
+
+    # Get a few sample images from the validation set
+    sample_images = []
+    sample_labels = []
+    for i in range(5):
+        image, label = val_dataset[i]
+        sample_images.append(image)
+        sample_labels.append(label)
+
+    # Make predictions on the sample images
+    with torch.no_grad():
+        sample_images = torch.stack(sample_images)
+        outputs = model(sample_images)
+        _, predicted = torch.max(outputs, 1)
+
+    # Print the predictions
+    print("\nSample Image Predictions:")
+    for i in range(len(sample_images)):
+        print(f"Image {i+1}: Predicted = {predicted[i]}, Actual = {sample_labels[i]}")

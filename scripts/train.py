@@ -3,10 +3,14 @@ import torch
 import yaml
 from torch.nn import functional as F
 from torch.optim import Adam
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
 from src.model import DynamicNeuralNetwork
 from src.hybrid_thresholds import HybridThresholds
+from src.per_sample_complexity import ComplexityAnalyzer
+from loguru import logger
 
+logger.add("training.log", rotation="500 MB", level="INFO")
 
 def parse_args():
     """
@@ -18,7 +22,6 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Train Dynamic Neural Network")
     parser.add_argument("--config", type=str, help="Path to training config file", required=True)
     return parser.parse_args()
-
 
 def load_config(config_path):
     """
@@ -33,8 +36,7 @@ def load_config(config_path):
     with open(config_path, "r") as file:
         return yaml.safe_load(file)
 
-
-def train_model(model, train_loader, val_loader, optimizer, device, epochs):
+def train_model(model, train_loader, val_loader, optimizer, device, epochs, complexity_analyzer):
     """
     Trains the model using adaptive thresholds and dynamic architecture.
 
@@ -45,18 +47,25 @@ def train_model(model, train_loader, val_loader, optimizer, device, epochs):
         optimizer (torch.optim.Optimizer): Optimizer.
         device (str): The computing device (CPU/GPU).
         epochs (int): Number of training epochs.
+        complexity_analyzer (ComplexityAnalyzer): Complexity analyzer.
     """
     model.to(device)
 
+    logger.info("Starting training epochs")
     for epoch in range(epochs):
+        logger.info(f"Starting epoch {epoch+1}/{epochs}")
         model.train()
         running_loss = 0.0
 
         for data, target in train_loader:
             data, target = data.to(device), target.to(device)
+            target = target.long()
+
+            # Calculate complexities
+            complexities = complexity_analyzer.calculate_complexities(data)
 
             optimizer.zero_grad()
-            output = model(data)
+            output = model(data, complexities)
             loss = F.cross_entropy(output, target)
             loss.backward()
             optimizer.step()
@@ -64,10 +73,21 @@ def train_model(model, train_loader, val_loader, optimizer, device, epochs):
             running_loss += loss.item()
 
         avg_loss = running_loss / len(train_loader)
-        print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}")
+        logger.info(f"Epoch {epoch+1}/{epochs}, Average Loss: {avg_loss:.4f}")
 
         validate_model(model, val_loader, device)
 
+        # Save model checkpoint
+        checkpoint_path = f"{config['training']['checkpoint_dir']}/model_epoch_{epoch+1}.pth"
+        torch.save(model.state_dict(), checkpoint_path)
+        logger.info(f"Model saved to {checkpoint_path}")
+
+        logger.info(f"Epoch {epoch+1}/{epochs} completed")
+
+    # Save final model
+    final_model_path = "models/final/model_v1.0_final.pth"
+    torch.save(model.state_dict(), final_model_path)
+    logger.info(f"Final model saved to {final_model_path}")
 
 def validate_model(model, val_loader, device):
     """
@@ -91,9 +111,9 @@ def validate_model(model, val_loader, device):
             correct += (predicted == target).sum().item()
 
     accuracy = 100.0 * correct / total
-    print(f"Validation Accuracy: {accuracy:.2f}%")
+    logger.info(f"Validation Accuracy: {accuracy:.2f}%")
 
-
+@logger.catch
 def main():
     """
     Main function to train the model.
@@ -105,28 +125,44 @@ def main():
 
     # Load model
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    hybrid_thresholds = HybridThresholds()
+    initial_thresholds = {
+        'variance': 0.1,
+        'entropy': 0.5,
+        'sparsity': 0.8
+    }
+    hybrid_thresholds = HybridThresholds(
+        initial_thresholds=initial_thresholds,
+        annealing_start_epoch=config["training"]["annealing_start_epoch"],
+        total_epochs=config["training"]["epochs"]
+    )
 
     model = DynamicNeuralNetwork(hybrid_thresholds=hybrid_thresholds).to(device)
 
-    # Generate random training dataset
-    train_dataset = TensorDataset(
-        torch.randn(500, config["model"]["input_size"]),
-        torch.randint(0, 10, (500,))
-    )
-    val_dataset = TensorDataset(
-        torch.randn(100, config["model"]["input_size"]),
-        torch.randint(0, 10, (100,))
-    )
+    # Define data transformations
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,)), # MNIST normalization
+        transforms.Lambda(lambda x: x.view(-1, 784)),
+    ])
 
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+    # Load MNIST dataset
+    train_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
+    val_dataset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
+
+    train_loader = DataLoader(train_dataset, batch_size=config["training"]["batch_size"], shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=config["training"]["batch_size"], shuffle=False)
 
     optimizer = Adam(model.parameters(), lr=config["training"]["learning_rate"])
 
-    # Train model
-    train_model(model, train_loader, val_loader, optimizer, device, config["training"]["epochs"])
+    logger.info("Starting training process")
 
+    # Initialize ComplexityAnalyzer
+    complexity_analyzer = ComplexityAnalyzer()
+
+    # Train model
+    train_model(model, train_loader, val_loader, optimizer, device, config["training"]["epochs"], complexity_analyzer)
+
+    logger.info("Training process completed")
 
 if __name__ == "__main__":
     main()

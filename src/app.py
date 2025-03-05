@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Header
 from pydantic import BaseModel
 import torch
 import yaml
@@ -6,6 +6,18 @@ from src.model import DynamicNeuralNetwork
 from src.hybrid_thresholds import HybridThresholds
 from src.analyzer import Analyzer
 from scripts.utils import load_model
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+API_KEY = os.getenv("API_KEY")
+API_KEY_NAME = "X-API-Key"
+
+async def verify_api_key(api_key_header: str = Header(None, alias=API_KEY_NAME)):
+    if api_key_header != API_KEY:
+        raise HTTPException(status_code=403, detail="Invalid API Key")
+    return True
 
 app = FastAPI(title="Dynamic Neural Network Refinement API")
 
@@ -32,7 +44,7 @@ model = load_model(model, config['output']['final_model_path'], device)
 analyzer = Analyzer()
 
 
-@app.post("/predict")
+@app.post("/predict", dependencies=[Depends(verify_api_key)])
 async def predict(request: InferenceRequest):
     """
     Endpoint for model inference.
