@@ -5,7 +5,7 @@ import yaml
 from src.model import DynamicNeuralNetwork
 from src.hybrid_thresholds import HybridThresholds
 from src.analyzer import Analyzer
-from scripts.utils import load_model
+
 from dotenv import load_dotenv
 import os
 
@@ -40,7 +40,10 @@ hybrid_thresholds = HybridThresholds(
 )
 
 model = DynamicNeuralNetwork(hybrid_thresholds=hybrid_thresholds).to(device)
-model = load_model(model, config['output']['final_model_path'], device)
+try:
+    model.load_state_dict(torch.load(config['output']['final_model_path'], map_location=device))
+except FileNotFoundError:
+    print("Warning: final_model_path not found, starting with untrained weights")
 analyzer = Analyzer()
 
 

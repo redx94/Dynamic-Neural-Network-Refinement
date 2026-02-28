@@ -70,7 +70,7 @@ def train_model(model, analyzer, train_loader, val_loader, config):
         # Save best model
         if accuracy > best_accuracy:
             best_accuracy = accuracy
-            best_model_path = "best_model.pth"
+            best_model_path = config['output'].get('final_model_path', 'best_model.pth')
             torch.save(model.state_dict(), best_model_path)
             logger.info(f"New best validation accuracy: {accuracy:.2f}%. Model saved.")
 
