@@ -2,7 +2,7 @@ import unittest
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 from src.nas import NAS
-from src.models.dynamic_nn import DynamicNN
+from src.model import DynamicNeuralNetwork
 
 
 class TestNAS(unittest.TestCase):
