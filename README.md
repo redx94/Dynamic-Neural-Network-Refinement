@@ -14,12 +14,59 @@ We are actively building this framework using a strict **Test-Driven Development
 
 ---
 
+## ✨ What's New in v0.3.0
+
+### 🎯 Mixture of Experts (MoE)
+Sparse gating with top-k expert selection, load balancing loss, and hierarchical architecture support.
+```python
+from src import MoEDynamicNetwork
+model = MoEDynamicNetwork(num_experts=8, top_k=2)
+```
+
+### 🧠 Reinforcement Learning Routing
+PPO-based policy learning for optimal routing decisions with hybrid rule-based + learned routing.
+```python
+from src import HybridRouter
+router = HybridRouter(rl_weight=0.7)
+```
+
+### 🔍 Neural Architecture Search
+Differentiable NAS (DARTS-style) and evolutionary search with performance prediction.
+```python
+from src import NASController
+controller = NASController(search_method='evolutionary')
+```
+
+### 📦 Pre-trained Models & Benchmarks
+Model registry, fine-tuning utilities, and comprehensive benchmark runner.
+```python
+from src import PretrainedLoader, BenchmarkRunner
+loader = PretrainedLoader()
+model = loader.load('dnnr-mnist-base')
+```
+
+### 🔒 Enterprise Security
+Tensor encryption, advanced anomaly detection, and API key management.
+```python
+from src.enterprise import SecureModelStorage, APIKeyManager
+```
+
+### ☁️ Edge-Cloud Orchestration
+Multi-device registry, intelligent scheduling, and automatic failover.
+```python
+from src.enterprise import EdgeCloudOrchestrator, LatencyOptimizedScheduler
+```
+
+---
+
 ## 🏢 Enterprise Security & Routing Suite (`/src/enterprise/`)
 We have elevated this framework beyond a research concept into a highly viable, robust enterprise product. The **Enterprise Suite** leverages the core dynamic routing math to provide security and efficiency tools for major companies (like OpenAI, Meta, Google):
 
 1. **Compute-Saver Edge Proxy (`compute_proxy.py`)**: Intercepts requests and calculates their complexity. Simple queries are routed to local lightweight engines, saving massive Cloud GPU (AWS) costs. Complex queries are bumped to the heavy cloud model.
 2. **Adversarial Anomaly Defense (`anomaly_defense.py`)**: A literal Cyber-Security shield. If hackers inject invisible algorithmic noise (like FGSM attacks on self-driving cars), the framework's mathematical `Analyzer` detects an unnatural, massive spike in input variance/entropy and instantly flags the cyber-attack before the network is compromised.
 3. **Green AI Battery Throttling (`green_ai.py`)**: Hardware-aware thresholds. This module pings the host device's OS (e.g., a phone, drone, or rover). If battery life drops below critical levels, it forces the AI to use the power-saving local pathway, dropping processing energy consumption drastically.
+4. **Model Encryption (`encryption.py`)**: Secure tensor encryption for model storage and inference with integrity verification.
+5. **Edge-Cloud Orchestration (`edge_cloud.py`)**: Intelligent workload distribution across edge and cloud devices with automatic failover.
 
 ## 🧠 The AI Dream Lab (`/AI_DREAM_LAB`)
 
@@ -40,9 +87,8 @@ cd Dynamic-Neural-Network-Refinement
 python3 -m venv .venv
 source .venv/bin/activate
 
-# Install successfully verified backend dependencies
+# Install dependencies
 pip install -r requirements.txt
-pip install fastapi uvicorn requests pydantic python-dotenv psutil
 ```
 
 ## 🚀 Demos & Execution
@@ -72,6 +118,11 @@ Because we are wrangling AI theory into strict mathematical reality, testing is 
 ```bash
 pytest tests/
 ```
+
+## 📖 Documentation
+
+- **[Advanced Features Guide](docs/advanced_features.md)**: Comprehensive guide to MoE, RL routing, NAS, pre-trained models, and enterprise features.
+- **[Roadmap](docs/roadmap.md)**: Project roadmap with completed and planned features.
 
 ## 🤝 Contributing
 
