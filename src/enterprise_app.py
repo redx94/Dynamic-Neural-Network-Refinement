@@ -9,6 +9,8 @@ from src.analyzer import Analyzer
 from src.enterprise.compute_proxy import ComputeProxy
 from src.enterprise.anomaly_defense import AnomalyDefense
 from src.enterprise.green_ai import GreenAI
+from src.enterprise.differential_privacy import PrivacyCloakLayer
+from src.enterprise.knowledge_distillation import DynamicDistiller
 
 load_dotenv()
 
@@ -22,8 +24,8 @@ async def verify_api_key(api_key_header: str = Header(None, alias=API_KEY_NAME))
 
 app = FastAPI(
     title="DNN Refinement - Enterprise Suite",
-    description="Showcasing dynamic load balancing, cyber-defense, and green-AI battery shifting.",
-    version="1.0.0"
+    description="Showcasing dynamic load balancing, cyber-defense, zero-knowledge privacy, green-AI, and knowledge distillation.",
+    version="1.2.0"
 )
 
 # Load config to grab initial baseline thresholds
@@ -36,6 +38,8 @@ analyzer = Analyzer()
 proxy = ComputeProxy(thresholds=config['thresholds'])
 defense = AnomalyDefense(max_variance=2.5, max_entropy=6.0)
 green_ai = GreenAI(critical_battery_level=20)
+privacy_cloak = PrivacyCloakLayer(epsilon=1.5, sensitivity=1.0)
+distiller = DynamicDistiller(temperature=3.0, alpha=0.5)
 
 
 class PayloadRequest(BaseModel):
@@ -83,12 +87,48 @@ async def analyze_and_route(request: PayloadRequest):
         # Based on complexity vs thresholds, where do we send this data for actual processing?
         destination = proxy.route_request(complexities)
 
+        # --- MODULE 4: ZERO-KNOWLEDGE PRIVACY ---
+        # If the data is being routed to the cloud, we MUST cloak it first to protect user privacy
+        if destination == "CLOUD_DEEP_ENGINE":
+            input_tensor = privacy_cloak.apply_cloak(input_tensor)
+            privacy_status = "APPLIED_LAPLACIAN_NOISE"
+        else:
+            privacy_status = "NOT_REQUIRED_FOR_LOCAL_INFERENCE"
+
         return {
             "status": "APPROVED",
             "routed_destination": destination,
+            "privacy_cloak": privacy_status,
             "metrics": {k: v.item() for k,v in complexities.items()}
         }
 
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+class DistillRequest(BaseModel):
+    student_logits: list
+    teacher_logits: list
+    targets: list
+
+@app.post("/distill_sync", dependencies=[Depends(verify_api_key)])
+async def distill_sync(request: DistillRequest):
+    """
+    Edge devices hit this endpoint to calculate how far they have drifted from the heavy Cloud Model.
+    The KL Divergence loss is returned so the local edge model can gradient-update itself.
+    """
+    try:
+        s_logits = torch.tensor(request.student_logits, dtype=torch.float32)
+        t_logits = torch.tensor(request.teacher_logits, dtype=torch.float32)
+        targets = torch.tensor(request.targets, dtype=torch.long)
+        
+        # Calculate knowledge transfer loss
+        loss = distiller.compute_distillation_loss(s_logits, t_logits, targets)
+        
+        return {
+            "status": "DISTILLATION_SUCCESS",
+            "blended_loss": loss.item(),
+            "action": "Proceed with local backward pass on Edge device."
+        }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
