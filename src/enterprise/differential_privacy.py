@@ -39,3 +39,5 @@ class PrivacyCloakLayer:
         cloaked_tensor = tensor + noise
         
         return cloaked_tensor
+
+# End of PrivacyCloakLayer

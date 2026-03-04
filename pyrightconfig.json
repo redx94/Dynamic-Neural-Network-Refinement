@@ -1,0 +1,8 @@
+{
+  "venvPath": "/home/redx/Antigravity/Dynamic-Neural-Network-Refinement",
+  "venv": ".venv",
+  "pythonPath": "/home/redx/Antigravity/Dynamic-Neural-Network-Refinement/.venv/bin/python",
+  "extraPaths": [
+    "/home/redx/Antigravity/Dynamic-Neural-Network-Refinement"
+  ]
+}
