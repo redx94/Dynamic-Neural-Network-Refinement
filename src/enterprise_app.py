@@ -118,8 +118,16 @@ async def distill_sync(request: DistillRequest):
     """
     try:
         s_logits = torch.tensor(request.student_logits, dtype=torch.float32)
+        if len(s_logits.shape) == 1:
+            s_logits = s_logits.unsqueeze(0)
+
         t_logits = torch.tensor(request.teacher_logits, dtype=torch.float32)
+        if len(t_logits.shape) == 1:
+            t_logits = t_logits.unsqueeze(0)
+
         targets = torch.tensor(request.targets, dtype=torch.long)
+        if len(targets.shape) == 0:
+            targets = targets.unsqueeze(0)
         
         # Calculate knowledge transfer loss
         loss = distiller.compute_distillation_loss(s_logits, t_logits, targets)
