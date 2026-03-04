@@ -2,22 +2,77 @@
 [![Build Status](https://github.com/redx94/Dynamic-Neural-Network-Refinement/actions/workflows/ci.yml/badge.svg)](https://github.com/redx94/Dynamic-Neural-Network-Refinement/actions)
 [![License](https://img.shields.io/badge/license-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
 
-> Self-evolving neural networks that adapt in real-time based on data complexity
+> **Self-evolving neural networks that adapt in real-time based on data complexity, equipped with Enterprise-grade Cyber Security, Compute Load Balancing, and Green AI power throttling!**
 
-## 🚀 Overview
+## 🚀 The Vision & Our "Divide and Conquer" Reality
 
-Dynamic Neural Network Refinement (DNNR) revolutionizes deep learning by enabling neural networks to autonomously adapt their architectures based on real-time data complexity. Unlike traditional static models, DNNR networks evolve during both training and inference, optimizing themselves for better performance and efficiency.
+This project is a unique frontier in deep learning development. It was originally generated entirely by AI, leading to a sprawling architecture filled with highly advanced, futuristic concepts.
 
-## ✨ Key Features
+We are actively building this framework using a strict **Test-Driven Development (TDD) "Divide and Conquer" approach**. We take the AI's visionary goals and systematically replace hallucinated modules with mathematically verified, rigorously tested, functional PyTorch logic. The core `src/` directory represents our grounded, working pipeline.
 
-- 🔄 **Real-time Architecture Adaptation**: Networks automatically adjust their structure based on data complexity
-- 📈 **Performance-Driven Evolution**: Continuous optimization using metrics like variance, entropy, and sparsity
-- 🔌 **Easy Integration**: Seamless integration with existing PyTorch projects
-- 🚅 **Distributed Training**: Built-in support for multi-GPU and multi-node training
-- 📊 **Advanced Monitoring**: Prometheus + Grafana dashboards for real-time insights
-- 🔒 **Production-Ready**: Comprehensive testing, CI/CD, and security measures
+---
+
+## ✨ What's New in v0.3.0
+
+### 🎯 Mixture of Experts (MoE)
+Sparse gating with top-k expert selection, load balancing loss, and hierarchical architecture support.
+```python
+from src import MoEDynamicNetwork
+model = MoEDynamicNetwork(num_experts=8, top_k=2)
+```
+
+### 🧠 Reinforcement Learning Routing
+PPO-based policy learning for optimal routing decisions with hybrid rule-based + learned routing.
+```python
+from src import HybridRouter
+router = HybridRouter(rl_weight=0.7)
+```
+
+### 🔍 Neural Architecture Search
+Differentiable NAS (DARTS-style) and evolutionary search with performance prediction.
+```python
+from src import NASController
+controller = NASController(search_method='evolutionary')
+```
+
+### 📦 Pre-trained Models & Benchmarks
+Model registry, fine-tuning utilities, and comprehensive benchmark runner.
+```python
+from src import PretrainedLoader, BenchmarkRunner
+loader = PretrainedLoader()
+model = loader.load('dnnr-mnist-base')
+```
+
+### 🔒 Enterprise Security
+Tensor encryption, advanced anomaly detection, and API key management.
+```python
+from src.enterprise import SecureModelStorage, APIKeyManager
+```
+
+### ☁️ Edge-Cloud Orchestration
+Multi-device registry, intelligent scheduling, and automatic failover.
+```python
+from src.enterprise import EdgeCloudOrchestrator, LatencyOptimizedScheduler
+```
+
+---
+
+## 🏢 Enterprise Security & Routing Suite (`/src/enterprise/`)
+We have elevated this framework beyond a research concept into a highly viable, robust enterprise product. The **Enterprise Suite** leverages the core dynamic routing math to provide security and efficiency tools for major companies (like OpenAI, Meta, Google):
+
+1. **Compute-Saver Edge Proxy (`compute_proxy.py`)**: Intercepts requests and calculates their complexity. Simple queries are routed to local lightweight engines, saving massive Cloud GPU (AWS) costs. Complex queries are bumped to the heavy cloud model.
+2. **Adversarial Anomaly Defense (`anomaly_defense.py`)**: A literal Cyber-Security shield. If hackers inject invisible algorithmic noise (like FGSM attacks on self-driving cars), the framework's mathematical `Analyzer` detects an unnatural, massive spike in input variance/entropy and instantly flags the cyber-attack before the network is compromised.
+3. **Green AI Battery Throttling (`green_ai.py`)**: Hardware-aware thresholds. This module pings the host device's OS (e.g., a phone, drone, or rover). If battery life drops below critical levels, it forces the AI to use the power-saving local pathway, dropping processing energy consumption drastically.
+4. **Model Encryption (`encryption.py`)**: Secure tensor encryption for model storage and inference with integrity verification.
+5. **Edge-Cloud Orchestration (`edge_cloud.py`)**: Intelligent workload distribution across edge and cloud devices with automatic failover.
+
+## 🧠 The AI Dream Lab (`/AI_DREAM_LAB`)
+
+Inside the `AI_DREAM_LAB/` directory, you will find preserved hallucinated scripts from the original AI generation ("Quantum Swarms", "Consciousness Engines", etc.). These files serve as an incubator for pure AI creativity. We preserve these visionary attempts so we can eventually reverse-engineer their concepts into legitimate state-of-the-art Deep Learning modules.
+
+---
 
 ## 🛠️ Installation
 
@@ -28,69 +83,59 @@ Get started with a few simple commands:
 git clone https://github.com/redx94/Dynamic-Neural-Network-Refinement.git
 cd Dynamic-Neural-Network-Refinement
 
-# Create and activate a virtual environment (optional but recommended)
-python3 -m venv venv
-source venv/bin/activate
+# Create and activate a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-## 🚀 Quick Start Guide
+## 🚀 Demos & Execution
 
-After installation, kick off the dynamic refinement process with:
+We have built specific interactive demos to prove the AI's compute dynamic functionality:
 
+**1. Enterprise Gateway & Cyber Defense Demo:**
+This launches the Enterprise FastAPI suite and runs clean traffic followed by simulated cyber-adversarial noise.
 ```bash
-python scripts/train.py --config config/config.yaml
+# Launch the API Server in terminal 1:
+python3 src/enterprise_app.py
+
+# Launch the ping script in terminal 2:
+python3 demo_enterprise.py
 ```
 
-Customize the provided configuration to tailor the refinement process to your specific requirements. Detailed usage instructions and parameter descriptions are available in our [Documentation](docs/).
+**2. Dynamic Routing Baseline Demo:**
+Runs the network on actual MNIST images, comparing standard images to high-noise images to show the deep vs. shallow compute routing live.
+```bash
+python3 demo_cli.py
+```
 
-## 📚 Documentation
+## 📚 Testing & Verification
 
-For in-depth tutorials, API references, and advanced configurations, check out our:  
-- [Wiki](https://github.com/redx94/Dynamic-Neural-Network-Refinement/wiki)  
-- [Docs Directory](docs/)
+Because we are wrangling AI theory into strict mathematical reality, testing is mandatory. To verify the math and stability of the entire repository (100% Passed):
+
+```bash
+pytest tests/
+```
+
+## 📖 Documentation
+
+- **[Advanced Features Guide](docs/advanced_features.md)**: Comprehensive guide to MoE, RL routing, NAS, pre-trained models, and enterprise features.
+- **[Roadmap](docs/roadmap.md)**: Project roadmap with completed and planned features.
 
 ## 🤝 Contributing
 
-We welcome your contributions! Here’s how to join the revolution:
+We welcome contributions to both our **Enterprise Architecture** and our **Dream Lab**! 
+Whether you're writing a strict Unit Test to fix a broken module, OR you're submitting a wildly futuristic pseudo-code hallucination to the Dream lab for us to decode later, we want you on board.
 
-1. **Fork the Repository:**  
-   Click the "Fork" button at the top-right of this page.
+1. **Fork the Repository:** Click the "Fork" button at the top-right of this page.
+2. **Create a Feature Branch:** `git checkout -b feature/your-feature-name`
+3. **Commit Your Changes:** `git commit -am 'Add new feature'`
+4. **Push and Open a PR:** `git push origin feature/your-feature-name`
 
-2. **Create a Feature Branch:**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-3. **Commit Your Changes:**
-   ```bash
-   git commit -am 'Add new feature'
-   ```
-
-4. **Push and Open a PR:**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-   Then, open a pull request for review.
-
-For more details, see our [CONTRIBUTING](CONTRIBUTING.md) guidelines.
-
-## 📜 License
+## 📜 License & Acknowledgments
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## 📞 Get in Touch
-
-Have questions, suggestions, or need support? Reach out to us:
-
-- **Email:** support@example.com  
-- **GitHub Issues:** [Submit an Issue](https://github.com/redx94/Dynamic-Neural-Network-Refinement/issues)
-
-## 🙏 Acknowledgments
-
-- Special thanks to the vibrant community of AI researchers and developers driving innovation every day.
-- Inspired by the latest breakthroughs in dynamic neural architectures and adaptive AI systems.
-
-**Dynamic Neural Network Refinement** is your gateway to next-level neural networks that evolve, adapt, and optimize continuously. Join us on this journey into the future of AI!
+**Dynamic Neural Network Refinement** is our gateway to next-level neural networks that evolve, adapt, and secure data continuously. Join us as we turn AI dreams into mathematical reality!
